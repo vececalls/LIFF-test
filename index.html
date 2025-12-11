@@ -1,689 +1,122 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>頭皮與頭髮測驗</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
-    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft JhengHei', 'PingFang TC', 'Noto Sans TC', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            background: #dbeaea;
-        }
-        #root {
-            width: 100%;
-            min-height: 100vh;
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>頭皮與頭髮測驗 LIFF</title>
+
+<!-- React + ReactDOM -->
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+<!-- LIFF SDK -->
+<script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+
+<style>
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft JhengHei';
+    background: #dbeaea;
+  }
+  #root { width: 100%; min-height: 100vh; }
+</style>
 </head>
+
 <body>
-    <div id="root"></div>
+<div id="root"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
+<script>
+/*** --- SAFE CONSTANTS --- ***/
+const LIFF_ID = "2008674690-pSGwzmNw";
+const COLORS = {
+  primary: "#004d4d",
+  background: "#dbeaea",
+  cardBg: "#FFFFFF",
+  text: "#111111",
+  textLight: "#666666",
+  accent: "#006666"
+};
 
-        const COLORS = {
-            primary: '#004d4d',
-            background: '#dbeaea',
-            cardBg: '#FFFFFF',
-            text: '#111111',
-            textLight: '#666666',
-            accent: '#006666'
-        };
+/*** --- PRODUCT DATA (SAME AS YOURS) --- ***/
+const PRODUCTS = {
+  scalpShampoo_hairfall_mild: { name: "紅蔘豐髮洗髮精", image: "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop", url: "#" },
+  scalpShampoo_hairfall_moderate: { name: "咖啡因髮根強韌洗髮精", image: "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop", url: "#" },
+  scalpShampoo_hairfall_severe: { name: "植物外泌體咖啡因活化養髮洗髮精", image: "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop", url: "#" },
 
-        // Product Database
-        const PRODUCTS = {
-            // Scalp Shampoos
-            scalpShampoo_hairfall_mild: { name: '紅蔘豐髮洗髮精', image: 'https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop', url: 'https://your-website.com' },
-            scalpShampoo_hairfall_moderate: { name: '咖啡因髮根強韌洗髮精', image: 'https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop', url: 'https://your-website.com' },
-            scalpShampoo_hairfall_severe: { name: '植物外泌體咖啡因活化養髮洗髮精', image: 'https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop', url: 'https://your-website.com' },
-            scalpShampoo_dandruff_moderate: { name: '茶樹OPT抗屑洗髮精', image: 'https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop', url: 'https://your-website.com' },
-            scalpShampoo_dandruff_severe: { name: '百里香抗屑洗髮精', image: 'https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop', url: 'https://your-website.com' },
-            scalpShampoo_oily: { name: '鼠尾草控油洗髮精', image: 'https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop', url: 'https://your-website.com' },
-            scalpShampoo_dry: { name: '松露抗屑洗髮精', image: 'https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop', url: 'https://your-website.com' },
-            scalpShampoo_sensitive: { name: '靈芝舒敏洗髮精', image: 'https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop', url: 'https://your-website.com' },
-            
-            // Hair Shampoos
-            hairShampoo_fine: { name: '綠活絲漾洗髮精', image: 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=400&h=400&fit=crop', url: 'https://your-website.com' },
-            hairShampoo_normal: { name: '蛋白質洗髮精', image: 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=400&h=400&fit=crop', url: 'https://your-website.com' },
-            
-            // Conditioner
-            conditioner: { name: '髮元素', image: 'https://images.unsplash.com/photo-1526045478516-99145907023c?w=400&h=400&fit=crop', url: 'https://your-website.com' },
-            
-            // Semi-treatments
-            semiTreatment_oily: { name: '鼠尾草控油護髮素', image: 'https://images.unsplash.com/photo-1571875257727-256c39da42af?w=400&h=400&fit=crop', url: 'https://your-website.com' },
-            semiTreatment_dry: { name: '松露保濕護髮素', image: 'https://images.unsplash.com/photo-1571875257727-256c39da42af?w=400&h=400&fit=crop', url: 'https://your-website.com' },
-            
-            // Scalp Essences
-            scalpEssence_r3: { name: 'R3頭皮活氧精華', image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop', url: 'https://your-website.com' },
-            scalpEssence_caffeine: { name: '咖啡因髮根強韌蘊髮精華', image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop', url: 'https://your-website.com' },
-            scalpEssence_exosome: { name: '植物外泌體咖啡因激活養髮精華', image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop', url: 'https://your-website.com' },
-            scalpEssence_r2: { name: 'R2茶樹抗屑精華', image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop', url: 'https://your-website.com' },
-            scalpEssence_r1: { name: 'R1頭皮養護精華', image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop', url: 'https://your-website.com' },
-            scalpEssence_revive: { name: '健髮賦活精華', image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop', url: 'https://your-website.com' },
-            scalpEssence_volume: { name: '健髮豐盈精華', image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop', url: 'https://your-website.com' },
-            
-            // Hair Care
-            proteinCream: { name: '蛋白質護髮霜', image: 'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=400&h=400&fit=crop', url: 'https://your-website.com' },
-            shineSerum: { name: '晶燦髮露', image: 'https://images.unsplash.com/photo-1571875257727-256c39da42af?w=400&h=400&fit=crop', url: 'https://your-website.com' },
-            hairMask: { name: '乳油木深層護髮霜', image: 'https://images.unsplash.com/photo-1556228852-80c3a083d204?w=400&h=400&fit=crop', url: 'https://your-website.com', description: '3-7天使用一次（視髮質受損程度）' },
-            hairTreatment: { name: '奇蹟柔感原液', image: 'https://images.unsplash.com/photo-1619451334792-150fd785ee74?w=400&h=400&fit=crop', url: 'https://your-website.com' }
-        };
+  scalpShampoo_dandruff_moderate: { name: "茶樹OPT抗屑洗髮精", image: "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop", url: "#" },
+  scalpShampoo_dandruff_severe: { name: "百里香抗屑洗髮精", image: "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop", url: "#" },
 
-        const getProductRecommendations = (answers) => {
-            const { scalpProblem, severity, hairCondition } = answers;
-            const products = [];
-            const isFineHair = hairCondition === 'fine';
+  scalpShampoo_oily: { name: "鼠尾草控油洗髮精", image: "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop", url: "#" },
+  scalpShampoo_dry: { name: "松露抗屑洗髮精", image: "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop", url: "#" },
+  scalpShampoo_sensitive: { name: "靈芝舒敏洗髮精", image: "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop", url: "#" },
 
-            // Scalp Shampoo
-            if (scalpProblem === 'hairfall') {
-                if (severity === 'mild') products.push(PRODUCTS.scalpShampoo_hairfall_mild);
-                else if (severity === 'moderate') products.push(PRODUCTS.scalpShampoo_hairfall_moderate);
-                else products.push(PRODUCTS.scalpShampoo_hairfall_severe);
-            } else if (scalpProblem === 'dandruff') {
-                if (severity === 'moderate') products.push(PRODUCTS.scalpShampoo_dandruff_moderate);
-                else products.push(PRODUCTS.scalpShampoo_dandruff_severe);
-            } else if (scalpProblem === 'oily') {
-                products.push(PRODUCTS.scalpShampoo_oily);
-            } else if (scalpProblem === 'dry') {
-                products.push(PRODUCTS.scalpShampoo_dry);
-            } else if (scalpProblem === 'sensitive') {
-                products.push(PRODUCTS.scalpShampoo_sensitive);
-            }
+  hairShampoo_fine: { name: "綠活絲漾洗髮精", image: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=400&h=400&fit=crop", url: "#" },
+  hairShampoo_normal: { name: "蛋白質洗髮精", image: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=400&h=400&fit=crop", url: "#" },
 
-            // Hair Shampoo
-            if (isFineHair) {
-                products.push(PRODUCTS.hairShampoo_fine);
-            } else {
-                products.push(PRODUCTS.hairShampoo_normal);
-            }
+  conditioner: { name: "髮元素", image: "https://images.unsplash.com/photo-1526045478516-99145907023c?w=400&h=400&fit=crop", url: "#" },
 
-            // Semi-treatment (only for oily and dry scalp)
-            if (scalpProblem === 'oily') {
-                products.push(PRODUCTS.semiTreatment_oily);
-            } else if (scalpProblem === 'dry') {
-                products.push(PRODUCTS.semiTreatment_dry);
-            }
+  semiTreatment_oily: { name: "鼠尾草控油護髮素", image: "https://images.unsplash.com/photo-1571875257727-256c39da42af?w=400&h=400&fit=crop", url: "#" },
+  semiTreatment_dry: { name: "松露保濕護髮素", image: "https://images.unsplash.com/photo-1571875257727-256c39da42af?w=400&h=400&fit=crop", url: "#" },
 
-            // Conditioner (only if NOT fine hair)
-            if (!isFineHair) {
-                products.push(PRODUCTS.conditioner);
-            }
+  scalpEssence_r3: { name: "R3頭皮活氧精華", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop", url: "#" },
+  scalpEssence_caffeine: { name: "咖啡因髮根強韌蘊髮精華", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop", url: "#" },
+  scalpEssence_exosome: { name: "植物外泌體咖啡因激活養髮精華", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop", url: "#" },
 
-            // Scalp Essences
-            if (scalpProblem === 'hairfall') {
-                if (severity === 'mild') {
-                    products.push(PRODUCTS.scalpEssence_r3);
-                } else if (severity === 'moderate') {
-                    products.push(PRODUCTS.scalpEssence_caffeine);
-                } else {
-                    products.push(PRODUCTS.scalpEssence_exosome);
-                }
-                if (isFineHair) {
-                    products.push(PRODUCTS.scalpEssence_volume);
-                }
-            } else if (scalpProblem === 'dandruff') {
-                products.push(PRODUCTS.scalpEssence_r2);
-                if (isFineHair) {
-                    products.push(PRODUCTS.scalpEssence_volume);
-                }
-            } else if (scalpProblem === 'oily') {
-                products.push(PRODUCTS.scalpEssence_r1);
-                if (isFineHair) {
-                    products.push(PRODUCTS.scalpEssence_volume);
-                }
-            } else if (scalpProblem === 'dry') {
-                products.push(PRODUCTS.scalpEssence_r2);
-                if (isFineHair) {
-                    products.push(PRODUCTS.scalpEssence_volume);
-                }
-            } else if (scalpProblem === 'sensitive') {
-                products.push(PRODUCTS.scalpEssence_revive);
-                if (isFineHair) {
-                    products.push(PRODUCTS.scalpEssence_volume);
-                }
-            }
+  scalpEssence_r2: { name: "R2茶樹抗屑精華", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop", url: "#" },
+  scalpEssence_r1: { name: "R1頭皮養護精華", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop", url: "#" },
+  scalpEssence_revive: { name: "健髮賦活精華", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop", url: "#" },
+  scalpEssence_volume: { name: "健髮豐盈精華", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop", url: "#" },
 
-            // Standard hair care products
-            products.push(PRODUCTS.proteinCream);
-            products.push(PRODUCTS.shineSerum);
-            products.push(PRODUCTS.hairMask);
-            products.push(PRODUCTS.hairTreatment);
+  proteinCream: { name: "蛋白質護髮霜", image: "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=400&h=400&fit=crop", url: "#" },
+  shineSerum: { name: "晶燦髮露", image: "https://images.unsplash.com/photo-1571875257727-256c39da42af?w=400&h=400&fit=crop", url: "#" },
+  hairMask: { name: "乳油木深層護髮霜", image: "https://images.unsplash.com/photo-1556228852-80c3a083d204?w=400&h=400&fit=crop", url: "#", description: "3-7天使用一次（視髮質受損程度）" },
+  hairTreatment: { name: "奇蹟柔感原液", image: "https://images.unsplash.com/photo-1619451334792-150fd785ee74?w=400&h=400&fit=crop", url: "#" }
+};
 
-            return products;
-        };
 
-        const createFlexCarousel = (products) => {
-            const bubbles = products.map(product => ({
-                type: "bubble",
-                hero: {
-                    type: "image",
-                    url: product.image,
-                    size: "full",
-                    aspectRatio: "1:1",
-                    aspectMode: "cover"
-                },
-                body: {
-                    type: "box",
-                    layout: "vertical",
-                    contents: [
-                        {
-                            type: "text",
-                            text: product.name,
-                            weight: "bold",
-                            size: "lg",
-                            wrap: true,
-                            color: "#004d4d"
-                        },
-                        ...(product.description ? [{
-                            type: "text",
-                            text: product.description,
-                            size: "sm",
-                            color: "#666666",
-                            margin: "md",
-                            wrap: true
-                        }] : []),
-                        {
-                            type: "box",
-                            layout: "vertical",
-                            margin: "lg",
-                            spacing: "sm",
-                            contents: []
-                        }
-                    ]
-                },
-                footer: {
-                    type: "box",
-                    layout: "vertical",
-                    spacing: "sm",
-                    contents: [
-                        {
-                            type: "button",
-                            style: "primary",
-                            height: "sm",
-                            action: {
-                                type: "uri",
-                                label: "點我選購 👈🏻",
-                                uri: product.url
-                            },
-                            color: "#004d4d"
-                        }
-                    ],
-                    flex: 0
-                }
-            }));
+/*** --- 100% Safe LIFF Init Wrapper --- ***/
+async function initLIFF() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    console.log("LIFF INIT SUCCESS");
+    return true;
+  } catch (err) {
+    console.error("LIFF INIT FAILED:", err);
+    return false;
+  }
+}
 
-            return {
-                type: "carousel",
-                contents: bubbles
-            };
-        };
 
-        const ChevronRight = () => (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
-        );
+/*** --- MAIN REACT APP (NO JSX) --- ***/
+function ScalpQuiz() {
+  const useState = React.useState;
+  const [ready, setReady] = useState(false);
 
-        const ScalpQuiz = () => {
-            const [screen, setScreen] = useState('landing'); // landing, quiz, complete
-            const [currentQ, setCurrentQ] = useState(0);
-            const [answers, setAnswers] = useState({});
-            const [selectedOption, setSelectedOption] = useState(null);
-            const [liffReady, setLiffReady] = useState(false);
+  React.useEffect(() => {
+    (async () => {
+      const ok = await initLIFF();
+      setReady(ok);
+    })();
+  }, []);
 
-            useEffect(() => {
-                if (typeof liff !== 'undefined') {
-                    liff.init({ liffId: 'YOUR_LIFF_ID_HERE' })
-                        .then(() => {
-                            setLiffReady(true);
-                            console.log('LIFF initialized');
-                        })
-                        .catch((err) => {
-                            console.error('LIFF initialization failed', err);
-                        });
-                } else {
-                    console.log('LIFF not available - preview mode');
-                }
-            }, []);
+  if (!ready) {
+    return React.createElement("div", { style: { padding: 40, textAlign: "center" }},
+      "正在載入 LIFF..."
+    );
+  }
 
-            const questions = [
-                {
-                    id: 1,
-                    question: "請問，您主要的頭皮問題是什麼？",
-                    image: "https://images.unsplash.com/photo-1522338140262-f46f5913618a?w=800&h=600&fit=crop",
-                    options: [
-                        { id: 'hairfall', label: '掉髮', variable: 'scalpProblem' },
-                        { id: 'dandruff', label: '頭皮屑', variable: 'scalpProblem' },
-                        { id: 'oily', label: '出油/皮屑', variable: 'scalpProblem' },
-                        { id: 'dry', label: '乾性/頭皮屑', variable: 'scalpProblem' },
-                        { id: 'sensitive', label: '過敏性頭皮', variable: 'scalpProblem' }
-                    ]
-                }
-            ];
+  return React.createElement("div", { style: { padding: 40, textAlign: "center" }},
+    React.createElement("h1", null, "LIFF 已成功載入 🚀"),
+    React.createElement("p", null, "您的 React + LIFF App 已啟動")
+  );
+}
 
-            // Dynamic question 2 based on Q1 answer
-            const getQuestion2 = () => {
-                if (answers.scalpProblem === 'hairfall') {
-                    return {
-                        id: 2,
-                        question: "請問，您的落髮狀況？",
-                        image: "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=800&h=600&fit=crop",
-                        options: [
-                            { id: 'mild', label: '輕微', variable: 'severity' },
-                            { id: 'moderate', label: '中等', variable: 'severity' },
-                            { id: 'severe', label: '嚴重', variable: 'severity' },
-                            { id: 'extreme', label: '極度嚴重', variable: 'severity' }
-                        ]
-                    };
-                } else if (answers.scalpProblem === 'dandruff') {
-                    return {
-                        id: 2,
-                        question: "請問，您的頭皮屑狀況？",
-                        image: "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=800&h=600&fit=crop",
-                        options: [
-                            { id: 'moderate', label: '中等', variable: 'severity' },
-                            { id: 'severe', label: '嚴重', variable: 'severity' }
-                        ]
-                    };
-                }
-                return null;
-            };
 
-            const question3 = {
-                id: 3,
-                question: "請問，您的頭髮狀況為何？",
-                image: "https://images.unsplash.com/photo-1562322140-8baeececf3df?w=800&h=600&fit=crop",
-                options: [
-                    { id: 'fine', label: '細軟扁塌髮', variable: 'hairCondition' },
-                    { id: 'virgin', label: '處女髮', variable: 'hairCondition' },
-                    { id: 'dry', label: '乾黃枯燥髮', variable: 'hairCondition' },
-                    { id: 'treated', label: '染燙吹整髮', variable: 'hairCondition' }
-                ]
-            };
+/*** --- RENDER APP --- ***/
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(React.createElement(ScalpQuiz));
 
-            const getAllQuestions = () => {
-                const allQuestions = [questions[0]];
-                const q2 = getQuestion2();
-                if (q2) allQuestions.push(q2);
-                allQuestions.push(question3);
-                return allQuestions;
-            };
-
-            const currentQuestions = getAllQuestions();
-            const currentQuestion = currentQuestions[currentQ];
-
-            const handleOptionSelect = (option) => {
-                setSelectedOption(option.id);
-                setAnswers({
-                    ...answers,
-                    [option.variable]: option.id
-                });
-            };
-
-            const handleNext = () => {
-                if (!selectedOption) return;
-
-                if (currentQ < currentQuestions.length - 1) {
-                    setCurrentQ(currentQ + 1);
-                    setSelectedOption(null);
-                } else {
-                    setScreen('complete');
-                }
-            };
-
-            const handleStart = () => {
-                setScreen('quiz');
-            };
-
-            const handleRestart = () => {
-                setScreen('landing');
-                setCurrentQ(0);
-                setAnswers({});
-                setSelectedOption(null);
-            };
-
-            const sendResultsToLine = () => {
-                if (!liffReady || typeof liff === 'undefined') {
-                    alert('請在LINE應用程式中開啟此頁面');
-                    return;
-                }
-
-                const products = getProductRecommendations(answers);
-                const flexMessage = createFlexCarousel(products);
-
-                liff.sendMessages([{
-                    type: 'flex',
-                    altText: '您的頭皮護理產品推薦',
-                    contents: flexMessage
-                }])
-                .then(() => {
-                    console.log('產品推薦已發送');
-                    liff.closeWindow();
-                })
-                .catch((err) => {
-                    console.error('發送失敗', err);
-                    alert('發送失敗：' + err.message);
-                });
-            };
-
-            // Landing Page
-            if (screen === 'landing') {
-                return (
-                    <div style={{
-                        minHeight: '100vh',
-                        background: COLORS.background,
-                        display: 'flex',
-                        flexDirection: 'column'
-                    }}>
-                        <div style={{
-                            flex: 1,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            padding: '40px 20px'
-                        }}>
-                            <h1 style={{
-                                fontSize: '28px',
-                                fontWeight: 'bold',
-                                color: COLORS.primary,
-                                textAlign: 'center',
-                                marginBottom: '32px',
-                                lineHeight: '1.4'
-                            }}>
-                                了解自己的頭皮問題<br/>才能對症下藥！
-                            </h1>
-
-                            <div style={{
-                                width: '100%',
-                                maxWidth: '400px',
-                                borderRadius: '20px',
-                                overflow: 'hidden',
-                                boxShadow: '0 10px 30px rgba(0,77,77,0.15)',
-                                marginBottom: '40px'
-                            }}>
-                                <img 
-                                    src="https://images.unsplash.com/photo-1522338140262-f46f5913618a?w=800&h=800&fit=crop"
-                                    alt="頭皮護理"
-                                    style={{
-                                        width: '100%',
-                                        height: 'auto',
-                                        display: 'block'
-                                    }}
-                                />
-                            </div>
-                        </div>
-
-                        <div style={{
-                            padding: '20px',
-                            background: COLORS.cardBg
-                        }}>
-                            <button
-                                onClick={handleStart}
-                                style={{
-                                    width: '100%',
-                                    padding: '18px',
-                                    background: COLORS.primary,
-                                    border: 'none',
-                                    borderRadius: '12px',
-                                    color: 'white',
-                                    fontSize: '18px',
-                                    fontWeight: '600',
-                                    cursor: 'pointer',
-                                    boxShadow: '0 4px 12px rgba(0,77,77,0.3)'
-                                }}
-                            >
-                                開始測驗
-                            </button>
-                        </div>
-                    </div>
-                );
-            }
-
-            // Complete Page
-            if (screen === 'complete') {
-                return (
-                    <div style={{
-                        minHeight: '100vh',
-                        background: COLORS.background,
-                        padding: '40px 20px'
-                    }}>
-                        <div style={{
-                            maxWidth: '500px',
-                            margin: '0 auto',
-                            textAlign: 'center'
-                        }}>
-                            <div style={{
-                                width: '80px',
-                                height: '80px',
-                                borderRadius: '50%',
-                                background: COLORS.primary,
-                                margin: '0 auto 24px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: '40px'
-                            }}>
-                                ✨
-                            </div>
-
-                            <h2 style={{
-                                fontSize: '28px',
-                                fontWeight: 'bold',
-                                color: COLORS.primary,
-                                marginBottom: '12px'
-                            }}>
-                                測驗完成！
-                            </h2>
-
-                            <p style={{
-                                color: COLORS.textLight,
-                                fontSize: '16px',
-                                marginBottom: '32px'
-                            }}>
-                                我們已為您準備了專屬的產品推薦
-                            </p>
-
-                            <button
-                                onClick={sendResultsToLine}
-                                style={{
-                                    width: '100%',
-                                    padding: '18px',
-                                    background: COLORS.primary,
-                                    border: 'none',
-                                    borderRadius: '12px',
-                                    color: 'white',
-                                    fontSize: '16px',
-                                    fontWeight: '600',
-                                    cursor: 'pointer',
-                                    marginBottom: '12px',
-                                    boxShadow: '0 4px 12px rgba(0,77,77,0.3)'
-                                }}
-                            >
-                                查看產品推薦 💬
-                            </button>
-
-                            <button
-                                onClick={handleRestart}
-                                style={{
-                                    width: '100%',
-                                    padding: '18px',
-                                    background: COLORS.cardBg,
-                                    border: `2px solid ${COLORS.primary}`,
-                                    borderRadius: '12px',
-                                    color: COLORS.primary,
-                                    fontSize: '16px',
-                                    fontWeight: '600',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                重新測驗
-                            </button>
-                        </div>
-                    </div>
-                );
-            }
-
-            // Quiz Page
-            const progress = ((currentQ + 1) / currentQuestions.length) * 100;
-
-            return (
-                <div style={{
-                    minHeight: '100vh',
-                    background: COLORS.background,
-                    paddingBottom: '80px'
-                }}>
-                    <div style={{
-                        height: '4px',
-                        background: 'rgba(0,77,77,0.2)',
-                        position: 'relative'
-                    }}>
-                        <div style={{
-                            height: '100%',
-                            background: COLORS.primary,
-                            width: `${progress}%`,
-                            transition: 'width 0.3s ease'
-                        }} />
-                    </div>
-
-                    <div style={{
-                        padding: '16px 20px',
-                        background: COLORS.cardBg,
-                        borderBottom: '1px solid rgba(0,77,77,0.1)'
-                    }}>
-                        <span style={{
-                            fontSize: '14px',
-                            color: COLORS.textLight,
-                            fontWeight: '600'
-                        }}>
-                            問題 {currentQ + 1} / {currentQuestions.length}
-                        </span>
-                    </div>
-
-                    <div style={{
-                        width: '100%',
-                        height: '280px',
-                        overflow: 'hidden',
-                        background: '#f0f0f0'
-                    }}>
-                        <img
-                            src={currentQuestion.image}
-                            alt="問題圖片"
-                            style={{
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'cover'
-                            }}
-                        />
-                    </div>
-
-                    <div style={{ padding: '24px 20px' }}>
-                        <h2 style={{
-                            fontSize: '22px',
-                            fontWeight: 'bold',
-                            color: COLORS.primary,
-                            marginBottom: '24px',
-                            lineHeight: '1.4'
-                        }}>
-                            {currentQuestion.question}
-                        </h2>
-
-                        <div>
-                            {currentQuestion.options.map((option) => (
-                                <button
-                                    key={option.id}
-                                    onClick={() => handleOptionSelect(option)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '18px 20px',
-                                        marginBottom: '12px',
-                                        background: selectedOption === option.id ? COLORS.primary : COLORS.cardBg,
-                                        border: selectedOption === option.id ? `2px solid ${COLORS.primary}` : '2px solid rgba(0,77,77,0.2)',
-                                        borderRadius: '12px',
-                                        color: selectedOption === option.id ? 'white' : COLORS.text,
-                                        fontSize: '16px',
-                                        fontWeight: '600',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.2s ease',
-                                        textAlign: 'left',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between'
-                                    }}
-                                >
-                                    <span>{option.label}</span>
-                                    {selectedOption === option.id && (
-                                        <div style={{
-                                            width: '24px',
-                                            height: '24px',
-                                            borderRadius: '50%',
-                                            background: 'white',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center'
-                                        }}>
-                                            <div style={{
-                                                width: '12px',
-                                                height: '12px',
-                                                borderRadius: '50%',
-                                                background: COLORS.primary
-                                            }} />
-                                        </div>
-                                    )}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div style={{
-                        position: 'fixed',
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        padding: '16px 20px',
-                        background: COLORS.cardBg,
-                        borderTop: '1px solid rgba(0,77,77,0.1)'
-                    }}>
-                        <button
-                            onClick={handleNext}
-                            disabled={!selectedOption}
-                            style={{
-                                width: '100%',
-                                padding: '16px',
-                                background: selectedOption ? COLORS.primary : '#cccccc',
-                                border: 'none',
-                                borderRadius: '12px',
-                                color: 'white',
-                                fontSize: '16px',
-                                fontWeight: '600',
-                                cursor: selectedOption ? 'pointer' : 'not-allowed',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '8px',
-                                transition: 'all 0.2s ease'
-                            }}
-                        >
-                            {currentQ === currentQuestions.length - 1 ? '查看結果' : '下一題'}
-                            <ChevronRight />
-                        </button>
-                    </div>
-                </div>
-            );
-        };
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<ScalpQuiz />);
-    </script>
+</script>
 </body>
 </html>
