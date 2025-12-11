@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hello LIFF</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+  <h1>Hello LIFF!</h1>
+  <button id="btn">Get Profile</button>
+
+  <script>
+    liff.init({ liffId: "2008674690-pSGwzmNw" })
+      .then(() => {
+        document.getElementById("btn").addEventListener("click", async () => {
+          const profile = await liff.getProfile();
+          alert(`Hello, ${profile.displayName}`);
+        });
+      })
+      .catch(console.error);
+  </script>
+</body>
+</html>
