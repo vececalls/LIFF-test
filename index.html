@@ -635,4 +635,55 @@
                                             <div style={{
                                                 width: '12px',
                                                 height: '12px',
-                                                borderRadius: '50
+                                                borderRadius: '50%',
+                                                background: COLORS.primary
+                                            }} />
+                                        </div>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div style={{
+                        position: 'fixed',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        padding: '16px 20px',
+                        background: COLORS.cardBg,
+                        borderTop: '1px solid rgba(0,77,77,0.1)'
+                    }}>
+                        <button
+                            onClick={handleNext}
+                            disabled={!selectedOption}
+                            style={{
+                                width: '100%',
+                                padding: '16px',
+                                background: selectedOption ? COLORS.primary : '#cccccc',
+                                border: 'none',
+                                borderRadius: '12px',
+                                color: 'white',
+                                fontSize: '16px',
+                                fontWeight: '600',
+                                cursor: selectedOption ? 'pointer' : 'not-allowed',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '8px',
+                                transition: 'all 0.2s ease'
+                            }}
+                        >
+                            {currentQ === currentQuestions.length - 1 ? '查看結果' : '下一題'}
+                            <ChevronRight />
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<ScalpQuiz />);
+    </script>
+</body>
+</html>
