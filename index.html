@@ -1,122 +1,534 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
+<!doctype html>
+<html lang="zh-Hant">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-<title>頭皮與頭髮測驗 LIFF</title>
-
-<!-- React + ReactDOM -->
-<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>頭皮與頭髮測驗 (LIFF - No React)</title>
 
 <!-- LIFF SDK -->
 <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
 
 <style>
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft JhengHei';
-    background: #dbeaea;
+  :root{
+    --bg: #dbeaea;
+    --accent: #004d4d;
+    --card: #ffffff;
+    --text: #111;
+    --muted: #666;
   }
-  #root { width: 100%; min-height: 100vh; }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{
+    max-width:720px;
+    margin:0 auto;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  header{
+    padding:18px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.4));
+    border-bottom:1px solid rgba(0,0,0,0.05);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  header h1{margin:0;font-size:18px;color:var(--accent)}
+  .subtitle{font-size:13px;color:var(--muted)}
+
+  main{padding:20px; flex:1;}
+
+  .step{
+    background:var(--card);
+    border-radius:12px;
+    padding:18px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    margin-bottom:16px;
+  }
+
+  .question{font-weight:700;margin-bottom:12px;font-size:16px}
+  .options{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .option{
+    padding:12px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);
+    background:linear-gradient(180deg, #fff, #fbfbfb);
+    cursor:pointer;text-align:center;
+  }
+  .option.selected{border-color:var(--accent);box-shadow:0 6px 18px rgba(0,77,77,0.06)}
+  .controls{display:flex;gap:10px;justify-content:space-between;align-items:center;margin-top:14px}
+  button{padding:10px 14px;border-radius:10px;border:0;background:var(--accent);color:#fff;font-weight:600;cursor:pointer}
+  button.ghost{background:transparent;color:var(--accent);border:1px solid rgba(0,0,0,0.06)}
+  .small{font-size:13px;padding:8px 10px;border-radius:8px}
+
+  .progress{height:8px;background:rgba(0,0,0,0.06);border-radius:999px;margin-bottom:12px;overflow:hidden}
+  .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent), #007b7b);width:0%}
+
+  /* result */
+  .results-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
+  .card{background:var(--card);border-radius:10px;padding:10px;box-shadow:0 6px 18px rgba(0,0,0,0.04);display:flex;gap:10px;align-items:center}
+  .card img{width:72px;height:72px;border-radius:8px;object-fit:cover}
+  .card .info{flex:1}
+  .card .title{font-weight:700;margin-bottom:6px}
+  .card .desc{font-size:13px;color:var(--muted)}
+
+  footer{padding:12px;text-align:center; border-top:1px solid rgba(0,0,0,0.03); background:transparent}
+  .share{background:#00c300;color:#fff;border-radius:10px;padding:10px 12px;border:0;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:8px}
+  .note{font-size:13px;color:var(--muted);margin-top:8px}
+  @media (max-width:480px){
+    .options{grid-template-columns:1fr}
+    .results-grid{grid-template-columns:1fr}
+    header{padding:12px}
+    main{padding:12px}
+  }
 </style>
 </head>
-
 <body>
-<div id="root"></div>
+<div class="app">
+  <header>
+    <div>
+      <h1>了解自己的頭皮問題，才能對症下藥！</h1>
+      <div class="subtitle">快速測驗 · 建議產品清單</div>
+    </div>
+    <div id="status" class="subtitle">載入 LIFF…</div>
+  </header>
+
+  <main id="main">
+    <!-- Progress bar -->
+    <div class="progress"><i id="prog"></i></div>
+
+    <!-- Step container -->
+    <div id="steps-container">
+      <!-- Step 1 -->
+      <div class="step" data-step="1">
+        <div class="question">1) 您的主要頭皮問題是？</div>
+        <div class="options" id="opt-problem">
+          <div class="option" data-value="掉髮">掉髮</div>
+          <div class="option" data-value="頭皮屑">頭皮屑</div>
+          <div class="option" data-value="出油/皮屑">出油/皮屑</div>
+          <div class="option" data-value="乾性/頭皮屑">乾性/頭皮屑</div>
+          <div class="option" data-value="過敏性頭皮">過敏性頭皮</div>
+        </div>
+      </div>
+
+      <!-- Step 2: conditional -->
+      <div class="step" data-step="2" style="display:none">
+        <div class="question" id="q2-title">2) 子題</div>
+        <div class="options" id="opt-sub">
+          <!-- options injected dynamically based on step1 -->
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step" data-step="3" style="display:none">
+        <div class="question">3) 請問，您的髮質/髮況為何？</div>
+        <div class="options" id="opt-hair">
+          <div class="option" data-value="細軟扁塌髮">細軟扁塌髮</div>
+          <div class="option" data-value="處女髮">處女髮</div>
+          <div class="option" data-value="乾黃枯燥髮">乾黃枯燥髮</div>
+          <div class="option" data-value="染燙吹整髮">染燙吹整髮</div>
+        </div>
+      </div>
+
+      <!-- Step 4: results -->
+      <div class="step" data-step="4" style="display:none">
+        <div class="question">建議的產品</div>
+        <div id="results-area">
+          <div id="results-grid" class="results-grid"></div>
+          <div class="note" id="results-note"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <div>
+        <button class="ghost small" id="btn-back" style="visibility:hidden">上一步</button>
+      </div>
+      <div>
+        <button id="btn-next">下一步</button>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <button id="btn-share" class="share" style="display:none">🔗 分享到 LINE</button>
+    <div class="note">此頁面為 LIFF + 純 Javascript 實作，無 React。</div>
+  </footer>
+</div>
 
 <script>
-/*** --- SAFE CONSTANTS --- ***/
-const LIFF_ID = "2008674690-pSGwzmNw";
-const COLORS = {
-  primary: "#004d4d",
-  background: "#dbeaea",
-  cardBg: "#FFFFFF",
-  text: "#111111",
-  textLight: "#666666",
-  accent: "#006666"
-};
-
-/*** --- PRODUCT DATA (SAME AS YOURS) --- ***/
+/* ---------- CONFIG ---------- */
+const LIFF_ID = "2008674690-pSGwzmNw"; // replace if you changed
 const PRODUCTS = {
   scalpShampoo_hairfall_mild: { name: "紅蔘豐髮洗髮精", image: "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop", url: "#" },
   scalpShampoo_hairfall_moderate: { name: "咖啡因髮根強韌洗髮精", image: "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop", url: "#" },
   scalpShampoo_hairfall_severe: { name: "植物外泌體咖啡因活化養髮洗髮精", image: "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop", url: "#" },
 
-  scalpShampoo_dandruff_moderate: { name: "茶樹OPT抗屑洗髮精", image: "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop", url: "#" },
-  scalpShampoo_dandruff_severe: { name: "百里香抗屑洗髮精", image: "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop", url: "#" },
+  scalpShampoo_dandruff_moderate: { name: "茶樹 OPT 抗屑洗髮精", image: "https://images.unsplash.com/photo-1571875257727-256c39da42af?w=400&h=400&fit=crop", url: "#" },
+  scalpShampoo_dandruff_severe: { name: "百里香抗屑洗髮精", image: "https://images.unsplash.com/photo-1571875257727-256c39da42af?w=400&h=400&fit=crop", url: "#" },
 
-  scalpShampoo_oily: { name: "鼠尾草控油洗髮精", image: "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop", url: "#" },
-  scalpShampoo_dry: { name: "松露抗屑洗髮精", image: "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop", url: "#" },
-  scalpShampoo_sensitive: { name: "靈芝舒敏洗髮精", image: "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop", url: "#" },
+  scalpShampoo_oily: { name: "鼠尾草控油洗髮精", image: "https://images.unsplash.com/photo-1571875257727-256c39da42af?w=400&h=400&fit=crop", url: "#" },
+  scalpShampoo_dry: { name: "松露抗屑洗髮精", image: "https://images.unsplash.com/photo-1556228852-80c3a083d204?w=400&h=400&fit=crop", url: "#" },
+  scalpShampoo_sensitive: { name: "靈芝舒敏洗髮精", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop", url: "#" },
 
   hairShampoo_fine: { name: "綠活絲漾洗髮精", image: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=400&h=400&fit=crop", url: "#" },
   hairShampoo_normal: { name: "蛋白質洗髮精", image: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=400&h=400&fit=crop", url: "#" },
 
-  conditioner: { name: "髮元素", image: "https://images.unsplash.com/photo-1526045478516-99145907023c?w=400&h=400&fit=crop", url: "#" },
+  conditioner: { name: "髮元素 (Conditioner)", image: "https://images.unsplash.com/photo-1526045478516-99145907023c?w=400&h=400&fit=crop", url: "#" },
 
   semiTreatment_oily: { name: "鼠尾草控油護髮素", image: "https://images.unsplash.com/photo-1571875257727-256c39da42af?w=400&h=400&fit=crop", url: "#" },
   semiTreatment_dry: { name: "松露保濕護髮素", image: "https://images.unsplash.com/photo-1571875257727-256c39da42af?w=400&h=400&fit=crop", url: "#" },
 
-  scalpEssence_r3: { name: "R3頭皮活氧精華", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop", url: "#" },
+  scalpEssence_r3: { name: "R3 頭皮活氧精華", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop", url: "#" },
   scalpEssence_caffeine: { name: "咖啡因髮根強韌蘊髮精華", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop", url: "#" },
   scalpEssence_exosome: { name: "植物外泌體咖啡因激活養髮精華", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop", url: "#" },
 
-  scalpEssence_r2: { name: "R2茶樹抗屑精華", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop", url: "#" },
-  scalpEssence_r1: { name: "R1頭皮養護精華", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop", url: "#" },
+  scalpEssence_r2: { name: "R2 茶樹抗屑精華", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop", url: "#" },
+  scalpEssence_r1: { name: "R1 頭皮養護精華", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop", url: "#" },
   scalpEssence_revive: { name: "健髮賦活精華", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop", url: "#" },
   scalpEssence_volume: { name: "健髮豐盈精華", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop", url: "#" },
 
   proteinCream: { name: "蛋白質護髮霜", image: "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=400&h=400&fit=crop", url: "#" },
   shineSerum: { name: "晶燦髮露", image: "https://images.unsplash.com/photo-1571875257727-256c39da42af?w=400&h=400&fit=crop", url: "#" },
-  hairMask: { name: "乳油木深層護髮霜", image: "https://images.unsplash.com/photo-1556228852-80c3a083d204?w=400&h=400&fit=crop", url: "#", description: "3-7天使用一次（視髮質受損程度）" },
+  hairMask: { name: "乳油木深層護髮霜 (每3-7天使用一次)", image: "https://images.unsplash.com/photo-1556228852-80c3a083d204?w=400&h=400&fit=crop", url: "#" },
   hairTreatment: { name: "奇蹟柔感原液", image: "https://images.unsplash.com/photo-1619451334792-150fd785ee74?w=400&h=400&fit=crop", url: "#" }
 };
 
+/* ---------- APP STATE ---------- */
+let state = {
+  step: 1,
+  answers: {
+    problem: null,      // Q1
+    sub: null,          // Q2 conditional (e.g., 掉髮 severity or 頭皮屑 severity)
+    hair: null          // Q3
+  }
+};
 
-/*** --- 100% Safe LIFF Init Wrapper --- ***/
-async function initLIFF() {
+/* ---------- UI helpers ---------- */
+function $(sel){return document.querySelector(sel)}
+function $all(sel){return Array.from(document.querySelectorAll(sel))}
+
+function setProgress(percent){
+  const p = $('#prog');
+  p.style.width = percent + '%';
+}
+
+/* Toggle selected option logic */
+function attachOptionHandlers(containerSelector, answerKey){
+  const container = $(containerSelector);
+  container.addEventListener('click', (e) => {
+    const opt = e.target.closest('.option');
+    if(!opt) return;
+    // deselect siblings
+    $all(containerSelector + ' .option').forEach(el => el.classList.remove('selected'));
+    opt.classList.add('selected');
+    const val = opt.dataset.value;
+    state.answers[answerKey] = val;
+    // if selecting first question, prepare conditional step
+    if(answerKey === 'problem') prepareConditional(val);
+  });
+}
+
+/* ---------- Conditional Q2 injection ---------- */
+function prepareConditional(problemValue){
+  const q2title = $('#q2-title');
+  const q2opts = $('#opt-sub');
+  q2opts.innerHTML = '';
+  state.answers.sub = null; // reset
+
+  if(problemValue === '掉髮'){
+    q2title.textContent = '2) 落髮狀況？';
+    const choices = ['輕微','中等','嚴重','極度嚴重'];
+    choices.forEach(v=>{
+      const d = document.createElement('div');
+      d.className='option';
+      d.dataset.value = v;
+      d.textContent = v;
+      q2opts.appendChild(d);
+    });
+  } else if(problemValue === '頭皮屑'){
+    q2title.textContent = '2) 頭皮屑狀況？';
+    const choices = ['中等','嚴重'];
+    choices.forEach(v=>{
+      const d = document.createElement('div');
+      d.className='option';
+      d.dataset.value = v;
+      d.textContent = v;
+      q2opts.appendChild(d);
+    });
+  } else {
+    // if not a conditional case, hide step 2 entirely by setting empty
+    // but we still show step2 as a passthrough (we'll skip it programmatically)
+  }
+  // wire options
+  attachOptionHandlers('#opt-sub', 'sub');
+}
+
+/* ---------- Step navigation ---------- */
+function showStep(num){
+  state.step = num;
+  $all('[data-step]').forEach(el => el.style.display = el.dataset.step == num ? '' : 'none');
+
+  // progress bar
+  const pct = (num - 1) / 3 * 100;
+  setProgress(pct);
+
+  // controls
+  const back = $('#btn-back');
+  const next = $('#btn-next');
+  back.style.visibility = num === 1 ? 'hidden' : 'visible';
+  if(num === 4){
+    next.textContent = '重新測驗';
+    $('#btn-share').style.display = 'inline-block';
+  } else {
+    next.textContent = '下一步';
+    $('#btn-share').style.display = 'none';
+  }
+
+  // update status text
+  $('#status').textContent = (window.liff && window.liff.isInClient()) ? '在 LINE 裡' : '外部瀏覽器';
+}
+
+/* ---------- Mapping logic: produces array of product keys ---------- */
+function mapLogic(answers){
+  const products = [];
+
+  const problem = answers.problem;
+  const sub = answers.sub;
+  const hair = answers.hair;
+
+  // helper to push unique keys
+  function pushKeys(keys){ keys.forEach(k => { if(!products.includes(k)) products.push(k) }); }
+
+  // handle dropped cases
+  if(problem === '掉髮'){
+    // map by severity: 輕微, 中等, 嚴重, 極度嚴重
+    let scalpKey = 'scalpShampoo_hairfall_mild';
+    let essence = 'scalpEssence_r3';
+    if(sub === '輕微'){ scalpKey = 'scalpShampoo_hairfall_mild'; essence = 'scalpEssence_r3'; }
+    else if(sub === '中等'){ scalpKey = 'scalpShampoo_hairfall_moderate'; essence = 'scalpEssence_caffeine'; }
+    else if(sub === '嚴重'){ scalpKey = 'scalpShampoo_hairfall_severe'; essence = 'scalpEssence_exosome'; }
+    else if(sub === '極度嚴重'){ scalpKey = 'scalpShampoo_hairfall_severe'; essence = 'scalpEssence_exosome'; }
+
+    // hair shampoo selection
+    const hairSh = (hair === '細軟扁塌髮') ? 'hairShampoo_fine' : 'hairShampoo_normal';
+
+    if(hair === '細軟扁塌髮'){
+      pushKeys([scalpKey, hairSh, essence, 'scalpEssence_volume', 'proteinCream', 'shineSerum', 'hairMask', 'hairTreatment']);
+    } else {
+      pushKeys([scalpKey, hairSh, 'conditioner', essence, 'proteinCream', 'shineSerum', 'hairMask', 'hairTreatment']);
+    }
+    return products;
+  }
+
+  if(problem === '頭皮屑'){
+    // sub: 中等 or 嚴重
+    const scalpKey = sub === '嚴重' ? 'scalpShampoo_dandruff_severe' : 'scalpShampoo_dandruff_moderate';
+    const essence = 'scalpEssence_r2';
+    const hairSh = (hair === '細軟扁塌髮') ? 'hairShampoo_fine' : 'hairShampoo_normal';
+    if(hair === '細軟扁塌髮'){
+      pushKeys([scalpKey, hairSh, essence, 'scalpEssence_volume', 'proteinCream', 'shineSerum', 'hairMask', 'hairTreatment']);
+    } else {
+      pushKeys([scalpKey, hairSh, 'conditioner', essence, 'proteinCream', 'shineSerum', 'hairMask', 'hairTreatment']);
+    }
+    return products;
+  }
+
+  if(problem === '出油/皮屑'){
+    const scalpKey = 'scalpShampoo_oily';
+    const semi = 'semiTreatment_oily';
+    const essence = 'scalpEssence_r1';
+    const hairSh = (hair === '細軟扁塌髮') ? 'hairShampoo_fine' : 'hairShampoo_normal';
+    if(hair === '細軟扁塌髮'){
+      pushKeys([scalpKey, hairSh, semi, essence, 'scalpEssence_volume', 'proteinCream', 'shineSerum', 'hairMask', 'hairTreatment']);
+    } else {
+      pushKeys([scalpKey, hairSh, semi, 'conditioner', essence, 'proteinCream', 'shineSerum', 'hairMask', 'hairTreatment']);
+    }
+    return products;
+  }
+
+  if(problem === '乾性/頭皮屑'){
+    const scalpKey = 'scalpShampoo_dry';
+    const semi = 'semiTreatment_dry';
+    const essence = 'scalpEssence_r2';
+    const hairSh = (hair === '細軟扁塌髮') ? 'hairShampoo_fine' : 'hairShampoo_normal';
+    if(hair === '細軟扁塌髮'){
+      pushKeys([scalpKey, hairSh, semi, essence, 'scalpEssence_volume', 'proteinCream', 'shineSerum', 'hairMask', 'hairTreatment']);
+    } else {
+      pushKeys([scalpKey, hairSh, semi, 'conditioner', essence, 'proteinCream', 'shineSerum', 'hairMask', 'hairTreatment']);
+    }
+    return products;
+  }
+
+  if(problem === '過敏性頭皮'){
+    const scalpKey = 'scalpShampoo_sensitive';
+    const essence = 'scalpEssence_revive';
+    const hairSh = (hair === '細軟扁塌髮') ? 'hairShampoo_fine' : 'hairShampoo_normal';
+    if(hair === '細軟扁塌髮'){
+      pushKeys([scalpKey, hairSh, essence, 'scalpEssence_volume', 'proteinCream', 'shineSerum', 'hairMask', 'hairTreatment']);
+    } else {
+      pushKeys([scalpKey, hairSh, 'conditioner', essence, 'proteinCream', 'shineSerum', 'hairMask', 'hairTreatment']);
+    }
+    return products;
+  }
+
+  // fallback
+  pushKeys(['scalpShampoo_hairfall_mild','hairShampoo_normal','scalpEssence_r3']);
+  return products;
+}
+
+/* ---------- Render results ---------- */
+function renderResults(productKeys){
+  const grid = $('#results-grid');
+  grid.innerHTML = '';
+  productKeys.forEach(k=>{
+    const p = PRODUCTS[k];
+    if(!p) return;
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <img src="${p.image}" alt="${escapeHtml(p.name)}" />
+      <div class="info">
+        <div class="title">${escapeHtml(p.name)}</div>
+        <div class="desc">建議產品 • 點擊查看</div>
+      </div>
+    `;
+    // click: go to url (or open modal) — here opens new tab or anchor
+    card.addEventListener('click', ()=> {
+      if(p.url && p.url !== '#') window.open(p.url,'_blank');
+      else alert(p.name + "\\n(示範用，請連結至商品頁)");
+    });
+    grid.appendChild(card);
+  });
+
+  $('#results-note').textContent = "建議依序：頭皮洗髮精 → 髮質洗髮精 → 精華 → 補充護髮/造型等。請依個人需求調整。";
+}
+
+/* ---------- Utilities ---------- */
+function escapeHtml(s){
+  return (s || '').replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});
+}
+
+/* ---------- Events for controls ---------- */
+$('#btn-next').addEventListener('click', ()=>{
+  if(state.step === 1){
+    if(!state.answers.problem){ alert('請選擇主要頭皮問題'); return; }
+    // if step1 selection leads to a conditional we should show step2; else skip to step3
+    const p = state.answers.problem;
+    if(p === '掉髮' || p === '頭皮屑'){
+      showStep(2);
+    } else {
+      showStep(3);
+    }
+  } else if(state.step === 2){
+    // if no option but the problem didn't require it (edge), still continue
+    const p = state.answers.problem;
+    if((p === '掉髮' || p === '頭皮屑') && !state.answers.sub){
+      alert('請選擇子題選項'); return;
+    }
+    showStep(3);
+  } else if(state.step === 3){
+    if(!state.answers.hair){ alert('請選擇髮質/髮況'); return; }
+    // compute results
+    const keys = mapLogic(state.answers);
+    renderResults(keys);
+    showStep(4);
+    setProgress(100);
+  } else if(state.step === 4){
+    // restart
+    resetQuiz();
+    showStep(1);
+    setProgress(0);
+  }
+});
+
+$('#btn-back').addEventListener('click', ()=>{
+  if(state.step === 2) showStep(1);
+  else if(state.step === 3){
+    // if problem needed conditional, go to 2, else to 1
+    const p = state.answers.problem;
+    if(p === '掉髮' || p === '頭皮屑') showStep(2);
+    else showStep(1);
+  }
+  else if(state.step === 4) showStep(3);
+});
+
+/* attach selects for hair Q */
+attachOptionHandlers('#opt-problem','problem');
+attachOptionHandlers('#opt-hair','hair');
+
+/* ---------- LIFF init + environment ---------- */
+async function initLiff(){
   try {
     await liff.init({ liffId: LIFF_ID });
-    console.log("LIFF INIT SUCCESS");
-    return true;
-  } catch (err) {
-    console.error("LIFF INIT FAILED:", err);
-    return false;
+    $('#status').textContent = liff.isInClient() ? '在 LINE 內開啟' : '瀏覽器開啟';
+    // optionally get profile (just console)
+    if(liff.isLoggedIn && liff.isLoggedIn()){
+      try{
+        const prof = await liff.getProfile();
+        console.log('profile', prof);
+      }catch(e){}
+    }
+  } catch (err){
+    console.error('LIFF init failed', err);
+    $('#status').textContent = 'LIFF 無法載入 (仍可於瀏覽器測試)';
   }
 }
 
-
-/*** --- MAIN REACT APP (NO JSX) --- ***/
-function ScalpQuiz() {
-  const useState = React.useState;
-  const [ready, setReady] = useState(false);
-
-  React.useEffect(() => {
-    (async () => {
-      const ok = await initLIFF();
-      setReady(ok);
-    })();
-  }, []);
-
-  if (!ready) {
-    return React.createElement("div", { style: { padding: 40, textAlign: "center" }},
-      "正在載入 LIFF..."
-    );
-  }
-
-  return React.createElement("div", { style: { padding: 40, textAlign: "center" }},
-    React.createElement("h1", null, "LIFF 已成功載入 🚀"),
-    React.createElement("p", null, "您的 React + LIFF App 已啟動")
-  );
+/* ---------- Reset ---------- */
+function resetQuiz(){
+  // reset UI selections
+  $all('.option').forEach(el => el.classList.remove('selected'));
+  state = { step:1, answers:{problem:null,sub:null,hair:null} };
+  $('#opt-sub').innerHTML = '';
+  $('#results-grid').innerHTML = '';
+  $('#results-note').textContent = '';
+  $('#btn-share').style.display = 'none';
+  setProgress(0);
 }
 
+/* ---------- Share button ---------- */
+$('#btn-share').addEventListener('click', async ()=>{
+  // build simple message summarizing choices and product names
+  const prodKeys = mapLogic(state.answers);
+  const prodNames = prodKeys.slice(0,6).map(k=>PRODUCTS[k]?.name || k).join('、');
+  const messageText = `我做了頭皮檢測：主訴 ${state.answers.problem} ${(state.answers.sub||'')}、髮況 ${state.answers.hair}。系統推薦：${prodNames}`;
 
-/*** --- RENDER APP --- ***/
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(React.createElement(ScalpQuiz));
+  // if in LINE environment, try shareTargetPicker
+  if(window.liff && liff.isInClient && liff.isInClient()){
+    try{
+      await liff.shareTargetPicker([
+        { type: 'text', text: messageText }
+      ]);
+      alert('已開啟分享介面');
+    }catch(e){
+      console.error(e);
+      alert('分享失敗，請確認 LINE 內開啟');
+    }
+  } else {
+    // fallback: copy to clipboard
+    try{
+      await navigator.clipboard.writeText(messageText);
+      alert('測驗摘要已複製到剪貼簿，請貼到 LINE 分享');
+    }catch(e){
+      alert('無法分享，此功能僅支援 LINE 內開啟或剪貼簿');
+    }
+  }
+});
 
+/* ---------- Misc: disable double-tap zoom, optional ---------- */
+// basic init
+showStep(1);
+setProgress(0);
+initLiff();
 </script>
 </body>
 </html>
