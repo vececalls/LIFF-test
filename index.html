@@ -662,15 +662,6 @@ function renderProductCard(p) {
     </div>`;
 }
 
-  return `
-    <div class="product-img">${p.emoji}</div>
-    <div class="product-info">
-      <div class="product-tag">${p.tag}</div>
-      <div class="product-name">${p.name}</div>
-      <a class="btn-buy" href="${p.storeUrl}" target="_blank">Buy Now</a>
-    </div>`;
-}
-
 function retakeQuiz() {
   answers.fill(null);
   currentQ = 0;
