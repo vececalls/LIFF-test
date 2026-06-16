@@ -361,18 +361,18 @@
 //  …and update the renderProductCard() function below.
 // ═══════════════════════════════════════════════════════════════
 const PRODUCTS = {
-  P01: { name: "Moisture Surge Shampoo",      emoji: "💧", tag: "Hydration",      storeUrl: "https://example.com/store/p01" },
-  P02: { name: "Curl Define Cream",            emoji: "🌀", tag: "Curl Care",      storeUrl: "https://example.com/store/p02" },
-  P03: { name: "Scalp Balance Serum",          emoji: "🌿", tag: "Scalp Health",   storeUrl: "https://example.com/store/p03" },
-  P04: { name: "Protein Repair Mask",          emoji: "✨", tag: "Strength",       storeUrl: "https://example.com/store/p04" },
-  P05: { name: "Shine & Silk Leave-In",        emoji: "🌟", tag: "Shine",          storeUrl: "https://example.com/store/p05" },
-  P06: { name: "Volume Lift Conditioner",      emoji: "🍃", tag: "Volume",         storeUrl: "https://example.com/store/p06" },
-  P07: { name: "Color Protect Gloss",          emoji: "🎨", tag: "Color Care",     storeUrl: "https://example.com/store/p07" },
-  P08: { name: "Deep Nourish Hair Oil",        emoji: "🫒", tag: "Nourishment",    storeUrl: "https://example.com/store/p08" },
-  P09: { name: "Anti-Frizz Smoothing Balm",   emoji: "🧴", tag: "Frizz Control",  storeUrl: "https://example.com/store/p09" },
-  P10: { name: "Strengthening Bond Serum",     emoji: "⚗️",  tag: "Bond Repair",   storeUrl: "https://example.com/store/p10" },
-  P11: { name: "Clarifying Detox Shampoo",     emoji: "🚿", tag: "Cleansing",      storeUrl: "https://example.com/store/p11" },
-  P12: { name: "Hydrating Co-Wash",            emoji: "🫧", tag: "Moisture",       storeUrl: "https://example.com/store/p12" },
+  P01: { name: "No.2油脂調理洗髮精",            emoji: "💧", tag: "Hydration",      storeUrl: "https://example.com/store/p01" },
+  P02: { name: "No.3 元氣洗髮精",              emoji: "🌀", tag: "Curl Care",      storeUrl: "https://example.com/store/p02" },
+  P03: { name: "甘胺酸護色舒緩洗髮精",           emoji: "🌿", tag: "Scalp Health",   storeUrl: "https://example.com/store/p03" },
+  P04: { name: "茶樹洗髮精",                    emoji: "✨", tag: "Strength",       storeUrl: "https://example.com/store/p04" },
+  P05: { name: "No.6 角質淨化洗髮精",            emoji: "🌟", tag: "Shine",          storeUrl: "https://example.com/store/p05" },
+  P06: { name: "No.36 OS頭皮淨化液",            emoji: "🍃", tag: "Volume",         storeUrl: "https://example.com/store/p06" },
+  P07: { name: "頭皮養護雞尾酒",                  emoji: "🎨", tag: "Color Care",     storeUrl: "https://example.com/store/p07" },
+  P08: { name: "茶樹頭皮保護液",                  emoji: "🫒", tag: "Nourishment",    storeUrl: "https://example.com/store/p08" },
+  P09: { name: "植萃養髮香水",                   emoji: "🧴", tag: "Frizz Control",  storeUrl: "https://example.com/store/p09" },
+  P10: { name: "No.25 頭皮精純液",               emoji: "⚗️",  tag: "Bond Repair",   storeUrl: "https://example.com/store/p10" },
+  P11: { name: "頭皮維他命",                     emoji: "🚿", tag: "Cleansing",      storeUrl: "https://example.com/store/p11" },
+  P12: { name: "人蔘蘆薈Spa甦醒液",               emoji: "🫧", tag: "Moisture",       storeUrl: "https://example.com/store/p12" },
   P13: { name: "Heat Shield Mist",             emoji: "🔥", tag: "Heat Protection",storeUrl: "https://example.com/store/p13" },
   P14: { name: "Scalp Exfoliating Scrub",      emoji: "🌊", tag: "Scalp Renewal",  storeUrl: "https://example.com/store/p14" },
   P15: { name: "Biotin Growth Tonic",          emoji: "🌱", tag: "Hair Growth",    storeUrl: "https://example.com/store/p15" },
@@ -406,89 +406,111 @@ const QUESTIONS = [
   // ── Q1 ──────────────────────────────────────────────────────
   {
     emoji: "💆",
-    title: "How does your scalp usually feel by midday?",
+    title: "最在意的頭皮症狀是？",
     options: [
-      { text: "Oily or greasy",           product: "P11" },
-      { text: "Dry or tight",             product: "P12" },
-      { text: "Flaky or itchy",           product: "P14" },
-      { text: "Balanced — no complaints", product: "P03" },
+      { text: "油膩、出油快且有異味",           product: "P01" },
+      { text: "屑屑明顯、偶爾搔癢",             product: "P02" },
+      { text: "乾癢、緊繃或脆弱",           product: "P03" },
+      { text: "毛孔堵塞感、頭皮黏膩", product: "P04" },
     ]
   },
   // ── Q2 ──────────────────────────────────────────────────────
   {
     emoji: "🪞",
-    title: "What's your biggest hair concern right now?",
+    title: "一天中最容易感覺到頭皮不舒服的時間為？",
     options: [
-      { text: "Frizz & flyaways",         product: "P09" },
-      { text: "Breakage & brittleness",   product: "P04" },
-      { text: "Dullness & no shine",      product: "P05" },
-      { text: "Flatness & no volume",     product: "P06" },
+      { text: "上午或中午（出油）",         product: null },
+      { text: "下午或傍晚（油脂累積）",   product: null },
+      { text: "洗髮隔天就不舒服",      product: null },
+      { text: "睡醒或長時間戴帽後特別不舒服",     product: null },
     ]
   },
   // ── Q3 ──────────────────────────────────────────────────────
   {
     emoji: "🌊",
-    title: "How would you describe your natural hair texture?",
+    title: "是否有頭皮屑呢？",
     options: [
-      { text: "Straight & fine",          product: "P19" },
-      { text: "Wavy & medium",            product: "P17" },
-      { text: "Curly & thick",            product: "P02" },
-      { text: "Coily & highly textured",  product: "P20" },
+      { text: "油性大塊（黏附）",          product: "P01" },
+      { text: "乾性細屑（粉狀）",          product: "P04" },
+      { text: "鮮紅/發炎伴隨脫屑（較嚴重）", product: "P05" },
+      { text: "不確定/沒注意過",           product: null },
     ]
   },
   // ── Q4 ──────────────────────────────────────────────────────
   {
     emoji: "🎨",
-    title: "Is your hair color-treated, bleached, or chemically processed?",
+    title: "是否曾接受過醫師/皮膚科關於頭皮的診斷？",
     options: [
-      { text: "Yes, regularly colored",   product: "P07" },
-      { text: "Bleached or highlighted",  product: "P10" },
-      { text: "Permed or relaxed",        product: "P17" },
-      { text: "No treatments — natural",  product: "P01" },
+      { text: "有，並按處方治療中或曾治療", product: null },
+      { text: "曾求診過但無長期治療",      product: null },
+      { text: "沒有，但有自行購買藥用產品", product: null },
+      { text: "沒有，也沒特別注意",       product: null },
     ]
   },
   // ── Q5 ──────────────────────────────────────────────────────
   {
     emoji: "🔥",
-    title: "How often do you use heat tools (blow dryer, flat iron, curling iron)?",
+    title: "是否有頭皮保養的習慣?",
     options: [
-      { text: "Every day",                product: "P13" },
-      { text: "A few times a week",       product: "P13" },
-      { text: "Occasionally",             product: "P08" },
-      { text: "Rarely or never",          product: "P18" },
+      { text: "每次洗髮後固定使用",  product: null },
+      { text: "每週2–3次",         product: null },
+      { text: "偶爾（遇問題才用）",  product: null },
+      { text: "從未使用過頭皮專品",  product: null },
     ]
   },
   // ── Q6 ──────────────────────────────────────────────────────
   {
     emoji: "🌱",
-    title: "What is your primary hair goal for the next 3 months?",
+    title: "是否對精油或特定植物成分敏感？",
     options: [
-      { text: "Grow longer & stronger",   product: "P15" },
-      { text: "Restore shine & softness", product: "P22" },
-      { text: "Tame frizz & smooth",      product: "P09" },
-      { text: "Add volume & thickness",   product: "P24" },
+      { text: "是（曾有紅腫、刺痛等反應）", product: null },
+      { text: "偶爾會有輕微刺感",         product: null },
+      { text: "幾乎沒有敏感史",           product: null },
+      { text: "不確定",                 product: null },
     ]
   },
   // ── Q7 ──────────────────────────────────────────────────────
   {
     emoji: "🚿",
-    title: "How often do you wash your hair?",
+    title: "希望頭皮水的主要功效？",
     options: [
-      { text: "Daily",                    product: "P21" },
-      { text: "Every 2–3 days",           product: "P01" },
-      { text: "Once a week",              product: "P12" },
-      { text: "Less than once a week",    product: "P18" },
+      { text: "強效淨化、去除多餘油脂",    product: "P06" },
+      { text: "即時舒緩、降低敏感與紅腫",  product: "P07" },
+      { text: "深層保濕、恢復屏障",       product: "P08" },
+      { text: "刺激頭皮循環、強健髮根",    product: "P09" },
     ]
   },
   // ── Q8 ──────────────────────────────────────────────────────
   {
     emoji: "🌡️",
-    title: "How does your hair behave in humidity?",
+    title: "平時是否使用會堵塞毛孔的造型品（大量髮蠟、油性慕斯）？",
     options: [
-      { text: "Puffs up & frizzes badly", product: "P09" },
-      { text: "Loses curl definition",    product: "P20" },
-      { text: "Goes limp & flat",         product: "P06" },
-      { text: "Barely changes — lucky me",product: "P16" },
+      { text: "經常使用，且難以完全清潔", product: null },
+      { text: "偶爾使用",              product: null },
+      { text: "很少或不使用",           product: null },
+      { text: "使用免沖洗油類較多",      product: null },
+    ]
+  },
+  // ── Q9 ──────────────────────────────────────────────────────
+  {
+    emoji: "🌡️",
+    title: "喜歡怎麼樣的頭皮水呢?",
+    options: [
+      { text: "清爽噴霧、迅速吸收",   product: "P06" },
+      { text: "精華液型、滋潤度佳",  product: "P10" },
+      { text: "乳液/霜狀，保濕為主",        product: null },
+      { text: "凝露/凝膠，感覺清涼舒適",  product: "P11" },
+    ]
+  },
+  // ── Q10 ──────────────────────────────────────────────────────
+  {
+    emoji: "🌡️",
+    title: "若要把頭皮分級以決定產品，你覺得你應屬於：",
+    options: [
+      { text: "油脂過盛型（需控油淨化）",   product: "P06" },
+      { text: "敏感易發炎型（需舒緩修護）",  product: ["P03", "P11"] },
+      { text: "屏障缺損乾燥型（需保濕修復）",        product: "P12" },
+      { text: "混合/複合型（需分區治理）",  product: "P07" },
     ]
   },
 ];
@@ -585,18 +607,19 @@ function prevQuestion() {
 
 // ── RESULT ───────────────────────────────────────────────────
 function showResult() {
-  // Collect product IDs from each answer, in question order
-  // Deduplicate: first occurrence wins, later duplicates are silently skipped
   const seen        = new Set();
   const recommended = [];
 
   QUESTIONS.forEach((q, qi) => {
     if (answers[qi] !== null) {
-      const pid = q.options[answers[qi]].product;
-      if (!seen.has(pid)) {
-        seen.add(pid);
-        recommended.push(pid);
-      }
+      const products = q.options[answers[qi]].product;
+      const pids = Array.isArray(products) ? products : [products];
+      pids.forEach(pid => {
+        if (pid && !seen.has(pid)) {
+          seen.add(pid);
+          recommended.push(pid);
+        }
+      });
     }
   });
 
