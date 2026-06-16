@@ -11,12 +11,12 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --cream:  #F5F5F5; 
+      --cream:  #FAF7F2;
       --ink:    #1A1714;
       --blush:  #D4A5A0;
       --sage:   #8A9E8C;
-      --warm:   #9A9A9A;
-      --muted:  #7A7A7A; 
+      --warm:   #C8956C;
+      --muted:  #7A746E;
       --card:   #FFFFFF;
       --border: #EAE4DD;
     }
@@ -553,7 +553,8 @@ function renderQuestion() {
   // document.getElementById('qImage').style.backgroundImage = `url('${q.image}')`;
 
   // text
-  document.getElementById('qCounter').textContent = `Question ${currentQ + 1} of ${total}`;
+  // document.getElementById('qCounter').textContent = `Question ${currentQ + 1} of ${total}`;
+  document.getElementById('qCounter').textContent = `第 ${currentQ + 1} 題，共 ${total} 題`;
   document.getElementById('qTitle').textContent   = q.title;
 
   // options
@@ -579,7 +580,8 @@ function renderQuestion() {
 
   const btnNext = document.getElementById('btnNext');
   btnNext.disabled    = answers[currentQ] === null;
-  btnNext.textContent = isLast ? 'See My Results →' : 'Continue →';
+  // btnNext.textContent = isLast ? 'See My Results →' : 'Continue →';
+  btnNext.textContent = isLast ? '查看結果 →' : '繼續 →';
 }
 
 function selectOption(i) {
@@ -625,8 +627,10 @@ function showResult() {
 
   // count bar
   const noun = recommended.length === 1 ? 'product' : 'products';
+  // document.getElementById('resultCountBar').textContent =
+    // `${recommended.length} ${noun} matched to your hair profile`;
   document.getElementById('resultCountBar').textContent =
-    `${recommended.length} ${noun} matched to your hair profile`;
+    `${recommended.length} 款符合您髮質的產品`;
 
   // product cards
   const list = document.getElementById('productsList');
