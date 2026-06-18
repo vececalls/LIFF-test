@@ -25,6 +25,7 @@
       color: var(--ink);
       overflow: hidden;
     }
+
     /* ── SCREENS ── */
     .screen {
       position: fixed; inset: 0;
@@ -38,6 +39,7 @@
     .screen.hidden {
       opacity: 0; pointer-events: none; transform: translateX(28px);
     }
+
     /* ── COVER ── */
     #cover { align-items: stretch; }
     .cover-hero {
@@ -89,6 +91,7 @@
       cursor: pointer; transition: background 0.2s, transform 0.15s;
     }
     .btn-primary:active { background: #3A3530; transform: scale(0.98); }
+
     /* ── QUESTION ── */
     #question { align-items: stretch; }
     .q-topbar {
@@ -145,7 +148,6 @@
       border-color: var(--warm); background: #FDF5EF;
     }
     .option-btn.selected .opt-label { color: var(--warm); }
-    /* sticky nav */
     .q-nav {
       position: fixed; bottom: 0; left: 0; right: 0;
       background: var(--cream); border-top: 1px solid var(--border);
@@ -169,6 +171,7 @@
       transition: opacity 0.2s;
     }
     .btn-next:disabled { opacity: 0.32; cursor: default; }
+
     /* ── RESULT ── */
     #result { align-items: stretch; }
     .result-header {
@@ -229,7 +232,16 @@
       transition: background 0.2s;
     }
     .btn-buy:active { background: #AD7A54; }
-    .retake-wrap { padding: 0 20px 48px; }
+    .retake-wrap { padding: 0 20px 48px; display: flex; flex-direction: column; gap: 10px; }
+    .btn-send {
+      width: 100%; background: var(--warm); color: #fff;
+      border: none; border-radius: 2px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 16px; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-send:active { background: #AD7A54; }
     .btn-retake {
       width: 100%; background: transparent;
       border: 1.5px solid var(--ink); border-radius: 2px;
@@ -245,11 +257,11 @@
      COVER
 ══════════════════════════════════════ -->
 <div id="cover" class="screen">
-  <img src="https://raw.githubusercontent.com/vececalls/LIFF-test/main/nppe-catalog/hero.png" class="cover-hero" alt="cover" />
+  <img src="https://raw.githubusercontent.com/vececalls/LIFF-test/master/nppe-catalog/hero.png" class="cover-hero" alt="cover" />
   <div class="cover-body">
     <div class="eyebrow">2分鐘左右</div>
-    <h1 class="cover-title">了解自己的頭皮問題，才能對症下藥！頭皮小測試</h1>
-    <p class="cover-sub">頭皮小測試</p>
+    <h1 class="cover-title">頭皮小測試</h1>
+    <p class="cover-sub">了解自己的頭皮問題，才能對症下藥！</p>
     <div class="cover-meta">
       <div class="cover-meta-item">
         <span class="val">10</span>
@@ -302,67 +314,63 @@
   <div class="result-count-bar" id="resultCountBar"></div>
   <div class="products-list" id="productsList"></div>
   <div class="retake-wrap">
+    <button class="btn-send" onclick="sendToChat()">📨 傳送結果到聊天室</button>
     <button class="btn-retake" onclick="retakeQuiz()">再一次</button>
   </div>
 </div>
 
 <script>
+// ═══════════════════════════════════════════════════════════════
+//  PRODUCT CATALOG
+// ═══════════════════════════════════════════════════════════════
 const PRODUCTS = {
-  P01: { name: "No.2油脂調理洗髮精",       image: "https://raw.githubusercontent.com/vececalls/LIFF-test/main/nppe-catalog/no-2.png", emoji: "💧", tag: "Hydration",      storeUrl: "https://www.nppehaircare.com/products/oily-fine-hair-shampoo" },
-  P02: { name: "No.3 元氣洗髮精",          image: "https://raw.githubusercontent.com/vececalls/LIFF-test/main/nppe-catalog/no-3.png", emoji: "🌀", tag: "Curl Care",      storeUrl: "https://www.nppehaircare.com/products/clean-hair" },
-  P03: { name: "甘胺酸護色舒緩洗髮精",      image: "https://raw.githubusercontent.com/vececalls/LIFF-test/main/nppe-catalog/甘胺酸護色舒緩洗髮精.png", emoji: "🌿", tag: "Scalp Health",   storeUrl: "https://www.nppehaircare.com/products/甘胺酸護色舒緩洗髮精" },
-  P04: { name: "茶樹洗髮精",               image: "https://raw.githubusercontent.com/vececalls/LIFF-test/main/nppe-catalog/茶樹洗髮精.png", emoji: "✨", tag: "Strength",       storeUrl: "https://www.nppehaircare.com/products/teatreeshampoo" },
-  P05: { name: "No.6 角質淨化洗髮精",       image: "https://raw.githubusercontent.com/vececalls/LIFF-test/main/nppe-catalog/no-6.png", emoji: "🌟", tag: "Shine",          storeUrl: "https://www.nppehaircare.com/products/no6-dandruff-shampoo" },
-  P06: { name: "No.36 OS頭皮淨化液",       image: "https://raw.githubusercontent.com/vececalls/LIFF-test/main/nppe-catalog/no-36.png", emoji: "🍃", tag: "Volume",         storeUrl: "https://www.nppehaircare.com/products/scalp-cleanser" },
-  P07: { name: "頭皮養護雞尾酒",            image: "https://raw.githubusercontent.com/vececalls/LIFF-test/main/nppe-catalog/頭皮養護雞尾酒.png", emoji: "🎨", tag: "Color Care",     storeUrl: "https://www.nppehaircare.com/products/soothing-scalp-essence" },
-  P08: { name: "茶樹頭皮保護液",            image: "https://raw.githubusercontent.com/vececalls/LIFF-test/main/nppe-catalog/茶樹頭皮保護液.png", emoji: "🫒", tag: "Nourishment",    storeUrl: "https://www.nppehaircare.com/products/teatreeshampoo" },
-  P09: { name: "植萃養髮香水",              image: "https://raw.githubusercontent.com/vececalls/LIFF-test/main/nppe-catalog/植萃養髮香水.png", emoji: "🧴", tag: "Frizz Control",  storeUrl: "https://www.nppehaircare.com/products/植萃養髮香水" },
-  P10: { name: "No.25 頭皮精純液",          image: "https://raw.githubusercontent.com/vececalls/LIFF-test/main/nppe-catalog/no-25.png", emoji: "⚗️", tag: "Bond Repair",   storeUrl: "https://www.nppehaircare.com/products/superb-hair-purifier" },
-  P11: { name: "頭皮維他命",               image: "https://raw.githubusercontent.com/vececalls/LIFF-test/main/nppe-catalog/頭皮維他命.png", emoji: "🚿", tag: "Cleansing",      storeUrl: "https://www.nppehaircare.com/products/頭皮維他命" },
-  P12: { name: "人蔘蘆薈Spa甦醒液",         image: "https://raw.githubusercontent.com/vececalls/LIFF-test/main/nppe-catalog/人蔘蘆薈Spa甦醒液.png",  emoji: "🫧", tag: "Moisture",       storeUrl: "https://www.nppehaircare.com/products/人蔘蘆薈甦醒液" },
-  P13: { name: "Heat Shield Mist",        emoji: "🔥", tag: "Heat Protection", storeUrl: "https://example.com/store/p13" },
-  P14: { name: "Scalp Exfoliating Scrub", emoji: "🌊", tag: "Scalp Renewal",   storeUrl: "https://example.com/store/p14" },
-  P15: { name: "Biotin Growth Tonic",     emoji: "🌱", tag: "Hair Growth",     storeUrl: "https://example.com/store/p15" },
-  P16: { name: "Detangling Spray",        emoji: "🪄", tag: "Detangling",      storeUrl: "https://example.com/store/p16" },
-  P17: { name: "Keratin Smoothing Treatment", emoji: "💎", tag: "Smoothing",   storeUrl: "https://example.com/store/p17" },
-  P18: { name: "Overnight Repair Mask",   emoji: "🌙", tag: "Intensive Care",  storeUrl: "https://example.com/store/p18" },
-  P19: { name: "Volumizing Root Spray",   emoji: "🌬️", tag: "Volume",          storeUrl: "https://example.com/store/p19" },
-  P20: { name: "Natural Curl Activator",  emoji: "💫", tag: "Curl Definition", storeUrl: "https://example.com/store/p20" },
-  P21: { name: "Sulfate-Free Gentle Wash",emoji: "🫶", tag: "Sensitive Scalp", storeUrl: "https://example.com/store/p21" },
-  P22: { name: "Argan Oil Finishing Serum", emoji: "✦", tag: "Polish & Shine", storeUrl: "https://example.com/store/p22" },
-  P23: { name: "Scalp Cooling Toner",     emoji: "❄️", tag: "Scalp Soothing",  storeUrl: "https://example.com/store/p23" },
-  P24: { name: "Thickening Fiber Spray",  emoji: "🪶", tag: "Thickness",       storeUrl: "https://example.com/store/p24" },
+  P01: { name: "No.2油脂調理洗髮精",    image: "https://raw.githubusercontent.com/vececalls/LIFF-test/master/nppe-catalog/no-2.png",            tag: "控油",   storeUrl: "https://www.nppehaircare.com/products/oily-fine-hair-shampoo" },
+  P02: { name: "No.3 元氣洗髮精",       image: "https://raw.githubusercontent.com/vececalls/LIFF-test/master/nppe-catalog/no-3.png",            tag: "清潔",   storeUrl: "https://www.nppehaircare.com/products/clean-hair" },
+  P03: { name: "甘胺酸護色舒緩洗髮精",  image: "https://raw.githubusercontent.com/vececalls/LIFF-test/master/nppe-catalog/甘胺酸護色舒緩洗髮精.png", tag: "舒緩",   storeUrl: "https://www.nppehaircare.com/products/甘胺酸護色舒緩洗髮精" },
+  P04: { name: "茶樹洗髮精",            image: "https://raw.githubusercontent.com/vececalls/LIFF-test/master/nppe-catalog/茶樹洗髮精.png",        tag: "抗屑",   storeUrl: "https://www.nppehaircare.com/products/teatreeshampoo" },
+  P05: { name: "No.6 角質淨化洗髮精",   image: "https://raw.githubusercontent.com/vececalls/LIFF-test/master/nppe-catalog/no-6.png",            tag: "淨化",   storeUrl: "https://www.nppehaircare.com/products/no6-dandruff-shampoo" },
+  P06: { name: "No.36 OS頭皮淨化液",    image: "https://raw.githubusercontent.com/vececalls/LIFF-test/master/nppe-catalog/no-36.png",           tag: "淨化",   storeUrl: "https://www.nppehaircare.com/products/scalp-cleanser" },
+  P07: { name: "頭皮養護雞尾酒",        image: "https://raw.githubusercontent.com/vececalls/LIFF-test/master/nppe-catalog/頭皮養護雞尾酒.png",    tag: "養護",   storeUrl: "https://www.nppehaircare.com/products/soothing-scalp-essence" },
+  P08: { name: "茶樹頭皮保護液",        image: "https://raw.githubusercontent.com/vececalls/LIFF-test/master/nppe-catalog/茶樹頭皮保護液.png",    tag: "保護",   storeUrl: "https://www.nppehaircare.com/products/teatreeshampoo" },
+  P09: { name: "植萃養髮香水",          image: "https://raw.githubusercontent.com/vececalls/LIFF-test/master/nppe-catalog/植萃養髮香水.png",      tag: "養髮",   storeUrl: "https://www.nppehaircare.com/products/植萃養髮香水" },
+  P10: { name: "No.25 頭皮精純液",      image: "https://raw.githubusercontent.com/vececalls/LIFF-test/master/nppe-catalog/no-25.png",           tag: "精純",   storeUrl: "https://www.nppehaircare.com/products/superb-hair-purifier" },
+  P11: { name: "頭皮維他命",            image: "https://raw.githubusercontent.com/vececalls/LIFF-test/master/nppe-catalog/頭皮維他命.png",        tag: "滋養",   storeUrl: "https://www.nppehaircare.com/products/頭皮維他命" },
+  P12: { name: "人蔘蘆薈Spa甦醒液",     image: "https://raw.githubusercontent.com/vececalls/LIFF-test/master/nppe-catalog/人蔘蘆薈Spa甦醒液.png", tag: "保濕",   storeUrl: "https://www.nppehaircare.com/products/人蔘蘆薈甦醒液" },
 };
 
+// ═══════════════════════════════════════════════════════════════
+//  QUESTIONS
+// ═══════════════════════════════════════════════════════════════
 const QUESTIONS = [
   {
-    image: "https://raw.githubusercontent.com/vececalls/LIFF-test/main/nppe-catalog/scalp-problem.jpg", emoji: "💆",
+    image: "https://raw.githubusercontent.com/vececalls/LIFF-test/master/nppe-catalog/scalp-problem.jpg",
+    emoji: "💆",
     title: "最在意的頭皮症狀是？",
     options: [
-      { text: "油膩、出油快且有異味",       product: "P01" },
-      { text: "屑屑明顯、偶爾搔癢",         product: "P02" },
-      { text: "乾癢、緊繃或脆弱",           product: "P03" },
-      { text: "毛孔堵塞感、頭皮黏膩",       product: "P04" },
+      { text: "油膩、出油快且有異味",     product: "P01" },
+      { text: "屑屑明顯、偶爾搔癢",       product: "P02" },
+      { text: "乾癢、緊繃或脆弱",         product: "P03" },
+      { text: "毛孔堵塞感、頭皮黏膩",     product: "P04" },
     ]
   },
   {
     emoji: "🪞",
     title: "一天中最容易感覺到頭皮不舒服的時間為？",
     options: [
-      { text: "上午或中午（出油）",             product: null },
-      { text: "下午或傍晚（油脂累積）",         product: null },
-      { text: "洗髮隔天就不舒服",               product: null },
-      { text: "睡醒或長時間戴帽後特別不舒服",   product: null },
+      { text: "上午或中午（出油）",           product: null },
+      { text: "下午或傍晚（油脂累積）",       product: null },
+      { text: "洗髮隔天就不舒服",             product: null },
+      { text: "睡醒或長時間戴帽後特別不舒服", product: null },
     ]
   },
   {
     emoji: "🌊",
     title: "是否有頭皮屑呢？",
     options: [
-      { text: "油性大塊（黏附）",               product: "P01" },
-      { text: "乾性細屑（粉狀）",               product: "P04" },
-      { text: "鮮紅/發炎伴隨脫屑（較嚴重）",   product: "P05" },
-      { text: "不確定/沒注意過",               product: null },
+      { text: "油性大塊（黏附）",             product: "P01" },
+      { text: "乾性細屑（粉狀）",             product: "P04" },
+      { text: "鮮紅/發炎伴隨脫屑（較嚴重）", product: "P05" },
+      { text: "不確定/沒注意過",             product: null },
     ]
   },
   {
@@ -379,10 +387,10 @@ const QUESTIONS = [
     emoji: "🔥",
     title: "是否有頭皮保養的習慣?",
     options: [
-      { text: "每次洗髮後固定使用",   product: null },
-      { text: "每週2–3次",           product: null },
-      { text: "偶爾（遇問題才用）",   product: null },
-      { text: "從未使用過頭皮專品",   product: null },
+      { text: "每次洗髮後固定使用", product: null },
+      { text: "每週2–3次",         product: null },
+      { text: "偶爾（遇問題才用）", product: null },
+      { text: "從未使用過頭皮專品", product: null },
     ]
   },
   {
@@ -416,36 +424,56 @@ const QUESTIONS = [
     ]
   },
   {
-    emoji: "🌡️",
+    emoji: "💎",
     title: "喜歡怎麼樣的頭皮水呢?",
     options: [
-      { text: "清爽噴霧、迅速吸收",     product: "P06" },
-      { text: "精華液型、滋潤度佳",     product: "P10" },
-      { text: "乳液/霜狀，保濕為主",   product: null },
+      { text: "清爽噴霧、迅速吸收",       product: "P06" },
+      { text: "精華液型、滋潤度佳",       product: "P10" },
+      { text: "乳液/霜狀，保濕為主",     product: null  },
       { text: "凝露/凝膠，感覺清涼舒適", product: "P11" },
     ]
   },
   {
-    emoji: "🌡️",
+    emoji: "🌿",
     title: "若要把頭皮分級以決定產品，你覺得你應屬於：",
     options: [
-      { text: "油脂過盛型（需控油淨化）",     product: "P06" },
+      { text: "油脂過盛型（需控油淨化）",     product: "P06"          },
       { text: "敏感易發炎型（需舒緩修護）",   product: ["P03", "P11"] },
-      { text: "屏障缺損乾燥型（需保濕修復）", product: "P12" },
-      { text: "混合/複合型（需分區治理）",   product: "P07" },
+      { text: "屏障缺損乾燥型（需保濕修復）", product: "P12"          },
+      { text: "混合/複合型（需分區治理）",   product: "P07"          },
     ]
   },
 ];
 
+// ═══════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════
 let currentQ = 0;
 let answers  = new Array(QUESTIONS.length).fill(null);
 
+// ── helpers ──────────────────────────────────────────────────
 function show(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
   document.getElementById(id).scrollTop = 0;
 }
 
+function getRecommended() {
+  const seen = new Set();
+  const list = [];
+  QUESTIONS.forEach((q, qi) => {
+    if (answers[qi] !== null) {
+      const products = q.options[answers[qi]].product;
+      const pids = Array.isArray(products) ? products : [products];
+      pids.forEach(pid => {
+        if (pid && !seen.has(pid)) { seen.add(pid); list.push(pid); }
+      });
+    }
+  });
+  return list;
+}
+
+// ── COVER ────────────────────────────────────────────────────
 function startQuiz() {
   currentQ = 0;
   answers.fill(null);
@@ -453,6 +481,7 @@ function startQuiz() {
   show('question');
 }
 
+// ── QUESTION ─────────────────────────────────────────────────
 function renderQuestion() {
   const q     = QUESTIONS[currentQ];
   const total = QUESTIONS.length;
@@ -460,15 +489,16 @@ function renderQuestion() {
 
   document.getElementById('progressFill').style.width = pct + '%';
   document.getElementById('qStepLabel').textContent   = `${currentQ + 1} / ${total}`;
-  // document.getElementById('qImage').textContent       = q.emoji;
+
   const qImageEl = document.getElementById('qImage');
-    if (q.image) {
-      qImageEl.innerHTML = `<img src="${q.image}" style="width:100%;height:100%;object-fit:cover;" />`;
-    } else {
-      qImageEl.textContent = q.emoji;
-    }
-  document.getElementById('qCounter').textContent     = `第 ${currentQ + 1} 題，共 ${total} 題`;
-  document.getElementById('qTitle').textContent       = q.title;
+  if (q.image) {
+    qImageEl.innerHTML = `<img src="${q.image}" style="width:100%;height:100%;object-fit:cover;" />`;
+  } else {
+    qImageEl.textContent = q.emoji;
+  }
+
+  document.getElementById('qCounter').textContent = `第 ${currentQ + 1} 題，共 ${total} 題`;
+  document.getElementById('qTitle').textContent   = q.title;
 
   const grid   = document.getElementById('optionsGrid');
   const labels = ['A', 'B', 'C', 'D'];
@@ -483,7 +513,6 @@ function renderQuestion() {
 
   const isFirst = currentQ === 0;
   const isLast  = currentQ === total - 1;
-
   document.getElementById('btnPrev').style.display = isFirst ? 'none' : 'block';
   const btnNext = document.getElementById('btnNext');
   btnNext.disabled    = answers[currentQ] === null;
@@ -500,12 +529,8 @@ function selectOption(i) {
 
 function nextQuestion() {
   if (answers[currentQ] === null) return;
-  if (currentQ < QUESTIONS.length - 1) {
-    currentQ++;
-    renderQuestion();
-  } else {
-    showResult();
-  }
+  if (currentQ < QUESTIONS.length - 1) { currentQ++; renderQuestion(); }
+  else showResult();
 }
 
 function prevQuestion() {
@@ -513,24 +538,12 @@ function prevQuestion() {
   else show('cover');
 }
 
+// ── RESULT ───────────────────────────────────────────────────
 function showResult() {
-  const seen        = new Set();
-  const recommended = [];
+  const recommended = getRecommended();
 
-  QUESTIONS.forEach((q, qi) => {
-    if (answers[qi] !== null) {
-      const products = q.options[answers[qi]].product;
-      const pids = Array.isArray(products) ? products : [products];
-      pids.forEach(pid => {
-        if (pid && !seen.has(pid)) {
-          seen.add(pid);
-          recommended.push(pid);
-        }
-      });
-    }
-  });
-
-  document.getElementById('resultCountBar').textContent = `${recommended.length} 款符合您髮質的產品`;
+  document.getElementById('resultCountBar').textContent =
+    `${recommended.length} 款符合您髮質的產品`;
 
   const list = document.getElementById('productsList');
   list.innerHTML = '';
@@ -548,7 +561,7 @@ function showResult() {
 
 function renderProductCard(p) {
   const imgHTML = p.image
-    ? `<img src="${p.image}" style="width:80px;height:80px;border-radius:6px;object-fit:cover;" />`
+    ? `<img src="${p.image}" style="width:80px;height:80px;border-radius:6px;object-fit:contain;background:#f5f5f5;" />`
     : `<div class="product-img">${p.emoji}</div>`;
   return `
     ${imgHTML}
@@ -566,6 +579,126 @@ function retakeQuiz() {
   show('question');
 }
 
+// ── FLEX MESSAGE → LINE CHAT ──────────────────────────────────
+function buildFlexBubble(p) {
+  return {
+    type: "bubble",
+    size: "kilo",
+    body: {
+      type: "box",
+      layout: "vertical",
+      paddingAll: "0px",
+      backgroundColor: "#FAF7F2",
+      contents: [
+        {
+          type: "box",
+          layout: "vertical",
+          paddingAll: "0px",
+          contents: [
+            {
+              type: "image",
+              url: p.image || "https://via.placeholder.com/300",
+              size: "full",
+              aspectRatio: "1:1",
+              aspectMode: "cover"
+            },
+            {
+              type: "box",
+              layout: "vertical",
+              contents: [],
+              position: "absolute",
+              background: {
+                type: "linearGradient",
+                angle: "0deg",
+                startColor: "#1A1714cc",
+                endColor: "#1A171400"
+              },
+              width: "100%",
+              height: "50%",
+              offsetBottom: "0px",
+              offsetStart: "0px"
+            },
+            {
+              type: "box",
+              layout: "vertical",
+              position: "absolute",
+              offsetBottom: "0px",
+              offsetStart: "0px",
+              offsetEnd: "0px",
+              paddingAll: "12px",
+              contents: [
+                {
+                  type: "text",
+                  text: p.tag,
+                  color: "#D4A5A0",
+                  size: "xxs",
+                  weight: "bold"
+                },
+                {
+                  type: "text",
+                  text: p.name,
+                  color: "#FAF7F2",
+                  size: "sm",
+                  weight: "bold",
+                  wrap: true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          type: "box",
+          layout: "vertical",
+          backgroundColor: "#FAF7F2",
+          paddingAll: "12px",
+          contents: [
+            {
+              type: "button",
+              action: {
+                type: "uri",
+                label: "立即購買",
+                uri: p.storeUrl
+              },
+              style: "primary",
+              color: "#C8956C",
+              height: "sm"
+            }
+          ]
+        }
+      ]
+    }
+  };
+}
+
+async function sendToChat() {
+  const recommended = getRecommended();
+
+  if (recommended.length === 0) {
+    alert("沒有符合的產品推薦！");
+    return;
+  }
+
+  const bubbles = recommended.map(pid => buildFlexBubble(PRODUCTS[pid]));
+
+  try {
+    await liff.sendMessages([
+      {
+        type: "flex",
+        altText: "您的專屬髮品推薦 🌿",
+        contents: {
+          type: "carousel",
+          contents: bubbles
+        }
+      }
+    ]);
+    alert("已傳送到聊天室！");
+  } catch (e) {
+    console.error(e);
+    alert("傳送失敗，請確認是否在 LINE 中開啟。");
+  }
+}
+
+// ── LIFF INIT ────────────────────────────────────────────────
 (async () => {
   try {
     await liff.init({ liffId: "2008674690-WOlXXaUN" });
