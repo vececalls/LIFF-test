@@ -460,7 +460,13 @@ function renderQuestion() {
 
   document.getElementById('progressFill').style.width = pct + '%';
   document.getElementById('qStepLabel').textContent   = `${currentQ + 1} / ${total}`;
-  document.getElementById('qImage').textContent       = q.emoji;
+  // document.getElementById('qImage').textContent       = q.emoji;
+  const qImageEl = document.getElementById('qImage');
+    if (q.image) {
+      qImageEl.innerHTML = `<img src="${q.image}" style="width:100%;height:100%;object-fit:cover;" />`;
+    } else {
+      qImageEl.textContent = q.emoji;
+    }
   document.getElementById('qCounter').textContent     = `第 ${currentQ + 1} 題，共 ${total} 題`;
   document.getElementById('qTitle').textContent       = q.title;
 
