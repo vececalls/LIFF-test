@@ -222,6 +222,10 @@
       display: block;
     }
     .product-info { flex: 1; min-width: 0; }
+    .product-tag {
+      font-size: 10px; font-weight: 500; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--sage); margin-bottom: 4px;
+    }
     .product-name {
       font-family: 'Cormorant Garamond', serif;
       font-size: 17px; font-weight: 600; line-height: 1.2;
@@ -329,9 +333,6 @@
 //  PRODUCT CATALOG
 //  price is only used in the flex-message carousel sent to chat,
 //  NOT shown on the in-app result page.
-//  tag is kept as data (handy for future use / internal reference)
-//  but is no longer displayed in either the web result cards or
-//  the Flex carousel sent to LINE.
 // ═══════════════════════════════════════════════════════════════
 const PRODUCTS = {
   P01: { name: "No.2油脂調理洗髮精",    price: "NT$1000", image: "https://raw.githubusercontent.com/vececalls/LIFF-test/master/nppe-catalog/no-2.png",            tag: "控油", storeUrl: "https://www.nppehaircare.com/products/oily-fine-hair-shampoo" },
@@ -552,7 +553,7 @@ function prevQuestion() {
   else show('cover');
 }
 
-// ── RESULT (in-app, NO tag, NO price shown) ────────────────────
+// ── RESULT (in-app, NO price shown) ────────────────────────────
 function showResult() {
   const recommended = getRecommended();
 
@@ -580,6 +581,7 @@ function renderProductCard(p) {
   return `
     ${imgHTML}
     <div class="product-info">
+      <div class="product-tag">${p.tag}</div>
       <div class="product-name">${p.name}</div>
       <a class="btn-buy" href="${p.storeUrl}" target="_blank">立即購買</a>
     </div>`;
@@ -592,7 +594,7 @@ function retakeQuiz() {
   show('question');
 }
 
-// ── FLEX MESSAGE → LINE CHAT (Option B: photo on top, info below) ──
+// ── FLEX MESSAGE → LINE CHAT (price shown here only) ───────────
 function buildFlexBubble(p) {
   return {
     type: "bubble",
@@ -604,35 +606,74 @@ function buildFlexBubble(p) {
       backgroundColor: "#FAF7F2",
       contents: [
         {
-          type: "image",
-          url: p.image || "https://via.placeholder.com/300",
-          size: "full",
-          aspectRatio: "1:1",
-          aspectMode: "fit",
-          backgroundColor: "#F5F5F5"
+          type: "box",
+          layout: "vertical",
+          paddingAll: "0px",
+          contents: [
+            {
+              type: "image",
+              url: p.image || "https://via.placeholder.com/300",
+              size: "full",
+              aspectRatio: "1:1",
+              aspectMode: "cover"
+            },
+            {
+              type: "box",
+              layout: "vertical",
+              contents: [],
+              position: "absolute",
+              background: {
+                type: "linearGradient",
+                angle: "0deg",
+                startColor: "#1A1714cc",
+                endColor: "#1A171400"
+              },
+              width: "100%",
+              height: "50%",
+              offsetBottom: "0px",
+              offsetStart: "0px"
+            },
+            {
+              type: "box",
+              layout: "vertical",
+              position: "absolute",
+              offsetBottom: "0px",
+              offsetStart: "0px",
+              offsetEnd: "0px",
+              paddingAll: "12px",
+              contents: [
+                {
+                  type: "text",
+                  text: p.tag,
+                  color: "#D4A5A0",
+                  size: "xxs",
+                  weight: "bold"
+                },
+                {
+                  type: "text",
+                  text: p.name,
+                  color: "#FAF7F2",
+                  size: "sm",
+                  weight: "bold",
+                  wrap: true
+                },
+                {
+                  type: "text",
+                  text: p.price,
+                  color: "#C8956C",
+                  size: "sm",
+                  weight: "bold"
+                }
+              ]
+            }
+          ]
         },
         {
           type: "box",
           layout: "vertical",
+          backgroundColor: "#FAF7F2",
           paddingAll: "12px",
-          spacing: "sm",
           contents: [
-            {
-              type: "text",
-              text: p.name,
-              color: "#1A1714",
-              size: "sm",
-              weight: "bold",
-              wrap: true
-            },
-            {
-              type: "text",
-              text: p.price,
-              color: "#C8956C",
-              size: "sm",
-              weight: "bold",
-              margin: "sm"
-            },
             {
               type: "button",
               action: {
@@ -642,8 +683,7 @@ function buildFlexBubble(p) {
               },
               style: "primary",
               color: "#C8956C",
-              height: "sm",
-              margin: "md"
+              height: "sm"
             }
           ]
         }
@@ -665,20 +705,12 @@ async function sendToChat() {
   try {
     await liff.sendMessages([
       {
-        type: "text",
-        text: "這是為您精心挑選的專屬髮品推薦 🌿"
-      },
-      {
         type: "flex",
         altText: "您的專屬髮品推薦 🌿",
         contents: {
           type: "carousel",
           contents: bubbles
         }
-      },
-      {
-        type: "text",
-        text: "想探索更多產品或掌握最新消息，歡迎追蹤：\n◆ 官網 https://www.nppehaircare.com/\n◆ 粉絲團 https://www.facebook.com/nppehair"
       }
     ]);
     alert("已傳送到聊天室！");
