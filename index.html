@@ -581,7 +581,6 @@ function renderProductCard(p) {
   return `
     ${imgHTML}
     <div class="product-info">
-      <div class="product-tag">${p.tag}</div>
       <div class="product-name">${p.name}</div>
       <a class="btn-buy" href="${p.storeUrl}" target="_blank">立即購買</a>
     </div>`;
@@ -642,13 +641,6 @@ function buildFlexBubble(p) {
               offsetEnd: "0px",
               paddingAll: "12px",
               contents: [
-                {
-                  type: "text",
-                  text: p.tag,
-                  color: "#D4A5A0",
-                  size: "xxs",
-                  weight: "bold"
-                },
                 {
                   type: "text",
                   text: p.name,
