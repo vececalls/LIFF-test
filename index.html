@@ -96,7 +96,7 @@
     #question { align-items: stretch; }
     .q-topbar {
       display: flex; align-items: center; gap: 12px;
-      padding: 14px 16px 10px;
+      padding: 18px 20px 12px;
       flex-shrink: 0;
     }
     .q-progress-track {
@@ -110,24 +110,18 @@
       font-size: 11px; font-weight: 500; color: var(--muted);
       white-space: nowrap; letter-spacing: 0.04em;
     }
-    .q-image {
-      width: 100%; height: 44vw; max-height: 220px;
-      background: linear-gradient(135deg, #D4C4B4 0%, #9E8878 100%);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 62px; flex-shrink: 0; overflow: hidden;
+    .q-body {
+      flex: 1; padding: 40px 24px 108px;
+      display: flex; flex-direction: column; justify-content: center;
     }
-    .q-image img {
-      width: 100%; height: 100%; object-fit: cover; display: block;
-    }
-    .q-body { flex: 1; padding: 22px 20px 108px; }
     .q-counter {
       font-size: 10px; font-weight: 500; letter-spacing: 0.18em;
-      text-transform: uppercase; color: var(--warm); margin-bottom: 6px;
+      text-transform: uppercase; color: var(--warm); margin-bottom: 10px;
     }
     .q-title {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(20px, 5.5vw, 28px); font-weight: 600; line-height: 1.22;
-      margin-bottom: 22px;
+      font-size: clamp(24px, 7vw, 32px); font-weight: 600; line-height: 1.25;
+      margin-bottom: 30px;
     }
     .options-grid {
       display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
@@ -135,9 +129,10 @@
     .option-btn {
       background: var(--card);
       border: 1.5px solid var(--border); border-radius: 6px;
-      padding: 14px 12px; text-align: left; cursor: pointer;
+      padding: 16px 14px; text-align: left; cursor: pointer;
       transition: border-color 0.18s, background 0.18s, transform 0.12s;
-      display: flex; flex-direction: column; gap: 5px;
+      display: flex; flex-direction: column; gap: 6px;
+      min-height: 76px;
     }
     .option-btn:active { transform: scale(0.97); }
     .opt-label {
@@ -299,7 +294,6 @@
     </div>
     <span class="q-step-label" id="qStepLabel"></span>
   </div>
-  <div class="q-image" id="qImage"></div>
   <div class="q-body">
     <div class="q-counter" id="qCounter"></div>
     <h2 class="q-title" id="qTitle"></h2>
@@ -351,11 +345,11 @@ const PRODUCTS = {
 
 // ═══════════════════════════════════════════════════════════════
 //  QUESTIONS
+//  (question-level images removed — only the cover hero and
+//   product photos are shown now)
 // ═══════════════════════════════════════════════════════════════
 const QUESTIONS = [
   {
-    image: "https://raw.githubusercontent.com/vececalls/LIFF-test/master/nppe-catalog/scalp-problem.jpg",
-    emoji: "💆",
     title: "最在意的頭皮症狀是？",
     options: [
       { text: "油膩、出油快且有異味",     product: "P01" },
@@ -365,8 +359,6 @@ const QUESTIONS = [
     ]
   },
   {
-    image: "https://raw.githubusercontent.com/vececalls/LIFF-test/master/nppe-catalog/q2.png",
-    emoji: "🪞",
     title: "一天中最容易感覺到頭皮不舒服的時間為？",
     options: [
       { text: "上午或中午（出油）",           product: null },
@@ -375,9 +367,7 @@ const QUESTIONS = [
       { text: "睡醒或長時間戴帽後特別不舒服", product: null },
     ]
   },
-  { 
-    image: "https://raw.githubusercontent.com/vececalls/LIFF-test/master/nppe-catalog/q3.png",
-    emoji: "🌊",
+  {
     title: "是否有頭皮屑呢？",
     options: [
       { text: "油性大塊（黏附）",             product: "P01" },
@@ -387,8 +377,6 @@ const QUESTIONS = [
     ]
   },
   {
-    image: "https://raw.githubusercontent.com/vececalls/LIFF-test/master/nppe-catalog/q4.png",
-    emoji: "🎨",
     title: "是否曾接受過醫師/皮膚科關於頭皮的診斷？",
     options: [
       { text: "有，並按處方治療中或曾治療", product: null },
@@ -398,7 +386,6 @@ const QUESTIONS = [
     ]
   },
   {
-    emoji: "🔥",
     title: "是否有頭皮保養的習慣?",
     options: [
       { text: "每次洗髮後固定使用", product: null },
@@ -408,7 +395,6 @@ const QUESTIONS = [
     ]
   },
   {
-    emoji: "🌱",
     title: "是否對精油或特定植物成分敏感？",
     options: [
       { text: "是（曾有紅腫、刺痛等反應）", product: null },
@@ -418,7 +404,6 @@ const QUESTIONS = [
     ]
   },
   {
-    emoji: "🚿",
     title: "希望頭皮水的主要功效？",
     options: [
       { text: "強效淨化、去除多餘油脂",   product: "P06" },
@@ -428,7 +413,6 @@ const QUESTIONS = [
     ]
   },
   {
-    emoji: "🌡️",
     title: "平時是否使用會堵塞毛孔的造型品（大量髮蠟、油性慕斯）？",
     options: [
       { text: "經常使用，且難以完全清潔", product: null },
@@ -438,7 +422,6 @@ const QUESTIONS = [
     ]
   },
   {
-    emoji: "💎",
     title: "喜歡怎麼樣的頭皮水呢?",
     options: [
       { text: "清爽噴霧、迅速吸收",       product: "P06" },
@@ -448,7 +431,6 @@ const QUESTIONS = [
     ]
   },
   {
-    emoji: "🌿",
     title: "若要把頭皮分級以決定產品，你覺得你應屬於：",
     options: [
       { text: "油脂過盛型（需控油淨化）",     product: "P06"          },
@@ -503,14 +485,6 @@ function renderQuestion() {
 
   document.getElementById('progressFill').style.width = pct + '%';
   document.getElementById('qStepLabel').textContent   = `${currentQ + 1} / ${total}`;
-
-  const qImageEl = document.getElementById('qImage');
-  if (q.image) {
-    qImageEl.innerHTML = `<img src="${q.image}" alt="" />`;
-  } else {
-    qImageEl.innerHTML = '';
-    qImageEl.textContent = q.emoji;
-  }
 
   document.getElementById('qCounter').textContent = `第 ${currentQ + 1} 題，共 ${total} 題`;
   document.getElementById('qTitle').textContent   = q.title;
